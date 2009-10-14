@@ -71,7 +71,7 @@ private:
 	// Pantalla sobre la que se dibuja.
 	SDL_Surface *SURFscreen;
 
-	// Imagen de fondo y superficie de recorte.
+	// Imagen de fondo.
 	SDL_Surface *SURFfondo;
 
 	// Superficie de juego.
@@ -87,6 +87,9 @@ private:
 	Sonido intercambiar;
 	Sonido seleccionar;
 	Sonido menu;
+
+	// Contadores.
+	Uint32 temporizador;
 };
 
 #endif	/* _JUEGO_H */

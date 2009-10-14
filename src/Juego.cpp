@@ -1,8 +1,10 @@
 #include <list>
 #include <SDL/SDL_video.h>
+#include <SDL/SDL_events.h>
 #include "SDL.h"
 #include "SDL_ttf.h"
 #include "Juego.h"
+#include "Directorio.h"
 
 // Constructor por defecto.
 Juego::Juego()
@@ -21,9 +23,12 @@ Juego::Juego()
 
 	// Variables de SDL.
 	SURFscreen = NULL;
-	SURFtexto = NULL;
+	//SURFtexto = NULL;
 	SURFfondo = NULL;
-	FONTfuente = NULL;
+	//FONTfuente = NULL;
+
+	// Iniciamos el temporizador.
+	temporizador = 0;
 }
 
 // Destructor.
@@ -204,7 +209,21 @@ void Juego::eventosMenu()
 			{
 				// Pulsada tecla 9.
 
+				// Al pulsar la tecla 9 se activa un temporizador para forzar la salida.
+				if(temporizador == 0)
+					temporizador = SDL_GetTicks();
 			}
+		}
+		else if (event.type == SDL_KEYUP)
+		{
+			if (event.key.keysym.sym == SDLK_KP9)
+			{
+				// Soltada tecla 9.
+
+				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
+				temporizador = 0;
+			}
+
 		}
 		else if (event.type == SDL_QUIT)
 		{
@@ -216,7 +235,13 @@ void Juego::eventosMenu()
 // Actualiza el menú.
 void Juego::actualizarMenu()
 {
+	// Comprobamos si la tecla de forzar salida lleva pulsada suficiente tiempo
+	if(temporizador != 0)
+	{
+		if(SDL_GetTicks() - temporizador > 4000)
+			salir = true;
 
+	}
 }
 
 // Hace un render del menú.
@@ -339,7 +364,20 @@ SDL_Event event;
 			{
 				// Pulsada tecla 9.
 
+				// Al pulsar la tecla 9 se activa un temporizador para forzar la salida.
+				temporizador = SDL_GetTicks();
 			}
+		}
+		else if (event.type == SDL_KEYUP)
+		{
+			if (event.key.keysym.sym == SDLK_KP9)
+			{
+				// Soltada tecla 9.
+
+				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
+				temporizador = 0;
+			}
+
 		}
 		else if (event.type == SDL_QUIT)
 		{
@@ -374,11 +412,19 @@ void Juego::renderJuego()
 // Carga los puzles.
 void Juego::cargarPuzles()
 {
-	// Añadimos el puzle oasis.
-	Puzle oasis("oasis");
-	puzles.push_front(oasis);
-
-	// Añadimos el puzle arizona.
-	Puzle arizona("arizona");
-	puzles.push_front(arizona);
+	Directorio directorio("puzles");
+	list<string> nombreDirectorios = directorio.getNombreDirectorios();
+	list<string>::iterator pos = nombreDirectorios.begin();
+	while (pos != nombreDirectorios.end())
+	{
+		string ruta = *pos;
+		if(ruta[0] != '.')
+		{
+			// Añadimos el puzle.
+			Puzle puzle(ruta);
+			puzles.push_front(puzle);
+			
+		}
+		pos++;
+	}
 }
