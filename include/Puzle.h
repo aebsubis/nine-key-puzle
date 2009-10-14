@@ -18,6 +18,12 @@ public:
 	// Constructor sobrecargado.
 	Puzle(string ruta);
 
+	/// Constructor de copia.
+	Puzle(const Puzle& puzle);
+
+	// Operador de asignación.
+	Puzle& operator=(const Puzle& puzle);
+
 	// Destructor.
 	~Puzle();
 
@@ -27,9 +33,19 @@ public:
 	// Establece la ruta.
 	void setRuta(string ruta);
 
+	// Remueve las piezas del puzle.
+	void remover();
+
+	// Dibuja el puzle.
+	void dibujar() const;
+
 private:
 
+	// Ruta del puzle.
 	string ruta;
+
+	// Matriz del estado puzle.
+	int estado[3][3];
 };
 
 

@@ -56,8 +56,11 @@ private:
 	// Listado de puzles disponibles.
 	list<Puzle> puzles;
 
+	// Puzle que se está jugando.
+	Puzle puzleActual;
+
 	// Número de puzle que se va a jugar o se está jugando.
-	int puzleActual;
+	int numPuzleActual;
 
 	// Indica si se debe salir.
 	bool salir;
@@ -90,6 +93,9 @@ private:
 
 	// Contadores.
 	Uint32 temporizador;
+
+	// Tiempo de escape.
+	int tiempoEscape;
 };
 
 #endif	/* _JUEGO_H */

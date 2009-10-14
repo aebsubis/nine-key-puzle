@@ -19,7 +19,7 @@ Juego::Juego()
 	cargarPuzles();
 
 	// Primer puzle.
-	puzleActual = 0;
+	numPuzleActual = 0;
 
 	// Variables de SDL.
 	SURFscreen = NULL;
@@ -29,6 +29,9 @@ Juego::Juego()
 
 	// Iniciamos el temporizador.
 	temporizador = 0;
+
+	// Tiempo de escape.
+	tiempoEscape = 4000;
 }
 
 // Destructor.
@@ -89,9 +92,15 @@ void Juego::inicializaSDL()
 	// Repetición de teclas.
 	SDL_EnableKeyRepeat(100, 100);
 
-	//Inicializamos los timers
-	//frameAnterior = SDL_GetTicks();
-	//iteracionAnterior = SDL_GetTicks();
+	// fgcolor
+	fgcolor.r = 0;
+	fgcolor.g = 0;
+	fgcolor.b = 0;
+
+	// bgcolor
+	bgcolor.r = 255;
+	bgcolor.g = 255;
+	bgcolor.b = 255;
 }
 
 // Inicia el juego.
@@ -155,10 +164,10 @@ void Juego::eventosMenu()
 			else if (event.key.keysym.sym == SDLK_KP2)
 			{
 				// Elegimos el puzle de abajo.
-				if(puzleActual == 0)
-					puzleActual = puzles.size()-1;
+				if(numPuzleActual == 0)
+					numPuzleActual = puzles.size()-1;
 				else
-					puzleActual--;
+					numPuzleActual--;
 
 				// Reproducimos el sonido.
 				menu.reproducir();
@@ -176,12 +185,34 @@ void Juego::eventosMenu()
 			}
 			else if (event.key.keysym.sym == SDLK_KP5)
 			{
-				// Seleccionamos el puzle actual y pasamos a jugar.
-				estado = 1;
+				// Seleccionamos el puzle actual.
+				list<Puzle>::iterator pos = puzles.begin();
+				int explorandoPosicion = 0;
+				bool encontrado = false;
+				while( pos != puzles.end() && encontrado == false)
+				{
+					if(explorandoPosicion == numPuzleActual)
+					{
+						puzleActual = *pos;
+						encontrado = true;
+					}
+					pos++;
+					explorandoPosicion++;
+				}
 
-				// Reproducimos el sonido.
-				seleccionar.reproducir();
+				if(encontrado == true)
+				{
+					// Pasamos a jugar.
+					estado = 1;
 
+					// Reproducimos el sonido.
+					seleccionar.reproducir();
+				}
+				else
+				{
+					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
+					salir = true;
+				}
 			}
 			else if (event.key.keysym.sym == SDLK_KP6)
 			{
@@ -196,10 +227,10 @@ void Juego::eventosMenu()
 			else if (event.key.keysym.sym == SDLK_KP8)
 			{
 				// Elegimos el puzle de arriba.
-				if((unsigned)puzleActual == puzles.size()-1)
-					puzleActual = 0;
+				if((unsigned)numPuzleActual == puzles.size()-1)
+					numPuzleActual = 0;
 				else
-					puzleActual++;
+					numPuzleActual++;
 
 				// Reproducimos el sonido.
 				menu.reproducir();
@@ -238,9 +269,11 @@ void Juego::actualizarMenu()
 	// Comprobamos si la tecla de forzar salida lleva pulsada suficiente tiempo
 	if(temporizador != 0)
 	{
-		if(SDL_GetTicks() - temporizador > 4000)
+		if(SDL_GetTicks() - temporizador > (unsigned)tiempoEscape)
+		{
+			temporizador = 0;
 			salir = true;
-
+		}
 	}
 }
 
@@ -254,8 +287,7 @@ void Juego::renderMenu()
 	SDL_BlitSurface(SURFfondo, NULL, SURFscreen, NULL);
 
 	// Dibujamos el listado de puzles.
-	list<Puzle>::iterator pos;
-	pos = puzles.begin();
+	list<Puzle>::iterator pos = puzles.begin();
 	int explorandoPosicion = 0;
 	while( pos != puzles.end())
 	{
@@ -264,7 +296,7 @@ void Juego::renderMenu()
 		// Calculamos la posición que toca.
 		SDL_Rect posicion;
 		posicion.x = 50;
-		posicion.y = 250 - 150*(explorandoPosicion - puzleActual);
+		posicion.y = 250 - 150*(explorandoPosicion - numPuzleActual);
 
 		// Obtenemos la ruta del puzle.
 		string rutaImagen = "puzles/"+activo.getRuta()+"/pequeno.bmp";
@@ -280,7 +312,7 @@ void Juego::renderMenu()
 		// Dibujamos la miniatura.
 		SDL_BlitSurface(miniatura, NULL, SURFscreen, &posicion);
 
-		if(explorandoPosicion == puzleActual)
+		if(explorandoPosicion == numPuzleActual)
 		{
 			// También lo dibujamos en grande.
 			posicion.x = 250;
@@ -305,7 +337,39 @@ void Juego::renderMenu()
 	}
 
 	
+	// Mostramos el tiempo restante para salir.
+	if(temporizador != 0)
+	{
+		// Variables locales.
+		SDL_Rect *rectangulo = new SDL_Rect;
 
+		// Fondo.
+		rectangulo->h = 20;
+		rectangulo->w = 100;
+		rectangulo->x = 650;
+		rectangulo->y = 15;
+		SDL_FillRect (SURFscreen, rectangulo, SDL_MapRGB (SURFscreen->format, 0, 100, 0));
+
+		// Obtenemos el porcentaje completado.
+		float tiempoTranscurrido = SDL_GetTicks() - temporizador;
+		float porcentajeCompletado = tiempoTranscurrido/tiempoEscape;
+
+		// Superficie.
+		rectangulo->h = 20;
+		rectangulo->w = 100 * porcentajeCompletado;
+		rectangulo->x = 650;
+		rectangulo->y = 15;
+		SDL_FillRect (SURFscreen, rectangulo, SDL_MapRGB (SURFscreen->format, 255, 0, 0));
+
+		// Texto.
+		SURFtexto = TTF_RenderText_Blended(FONTfuente, "Saliendo...", fgcolor);
+		RECTtexto.h = SURFtexto->h;
+		RECTtexto.w = SURFtexto->w;
+		RECTtexto.x = rectangulo->x+20;
+		RECTtexto.y = rectangulo->y+2;
+		SDL_BlitSurface(SURFtexto, NULL,SURFscreen,&RECTtexto);
+
+	}
 
 	// Refrescamos la pantalla.
 	SDL_Flip (SURFscreen);
@@ -365,7 +429,8 @@ SDL_Event event;
 				// Pulsada tecla 9.
 
 				// Al pulsar la tecla 9 se activa un temporizador para forzar la salida.
-				temporizador = SDL_GetTicks();
+				if(temporizador == 0)
+					temporizador = SDL_GetTicks();
 			}
 		}
 		else if (event.type == SDL_KEYUP)
@@ -389,7 +454,15 @@ SDL_Event event;
 // Actualiza el juego.
 void Juego::actualizarJuego()
 {
-
+	// Comprobamos si la tecla de forzar salida lleva pulsada suficiente tiempo
+	if(temporizador != 0)
+	{
+		if(SDL_GetTicks() - temporizador > (unsigned)tiempoEscape)
+		{
+			temporizador = 0;
+			estado = 0;
+		}
+	}
 }
 
 // Hace un render del juego.
@@ -402,7 +475,7 @@ void Juego::renderJuego()
 	SDL_BlitSurface(SURFfondo, NULL, SURFscreen, NULL);
 
 	// Dibujamos el puzle actual.
-	
+	puzleActual.dibujar();
 
 	// Refrescamos la pantalla.
 	SDL_Flip (SURFscreen);
