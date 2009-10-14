@@ -33,6 +33,7 @@ OBJECTDIR=build/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/src/Puzle.o \
 	${OBJECTDIR}/src/Juego.o \
+	${OBJECTDIR}/src/Directorio.o \
 	${OBJECTDIR}/src/Sonido.o \
 	${OBJECTDIR}/main.o
 
@@ -67,6 +68,10 @@ ${OBJECTDIR}/src/Puzle.o: nbproject/Makefile-${CND_CONF}.mk src/Puzle.cpp
 ${OBJECTDIR}/src/Juego.o: nbproject/Makefile-${CND_CONF}.mk src/Juego.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	$(COMPILE.cc) -O2 -o ${OBJECTDIR}/src/Juego.o src/Juego.cpp
+
+${OBJECTDIR}/src/Directorio.o: nbproject/Makefile-${CND_CONF}.mk src/Directorio.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	$(COMPILE.cc) -O2 -o ${OBJECTDIR}/src/Directorio.o src/Directorio.cpp
 
 ${OBJECTDIR}/src/Sonido.o: nbproject/Makefile-${CND_CONF}.mk src/Sonido.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src

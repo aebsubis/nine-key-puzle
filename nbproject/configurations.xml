@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>include/Directorio.h</itemPath>
       <itemPath>include/Juego.h</itemPath>
       <itemPath>include/Puzle.h</itemPath>
       <itemPath>include/Sonido.h</itemPath>
@@ -15,6 +16,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>src/Directorio.cpp</itemPath>
       <itemPath>src/Juego.cpp</itemPath>
       <itemPath>src/Puzle.cpp</itemPath>
       <itemPath>src/Sonido.cpp</itemPath>
