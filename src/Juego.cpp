@@ -1,6 +1,8 @@
 #include <list>
+#include <sstream>
 #include <SDL/SDL_video.h>
 #include <SDL/SDL_events.h>
+#include <SDL/SDL.h>
 #include "SDL.h"
 #include "SDL_ttf.h"
 #include "Juego.h"
@@ -23,21 +25,30 @@ Juego::Juego()
 
 	// Variables de SDL.
 	SURFscreen = NULL;
-	//SURFtexto = NULL;
 	SURFfondo = NULL;
-	//FONTfuente = NULL;
+	SURFsaliendo = NULL;
+	SURFcompletado = NULL;
 
 	// Iniciamos el temporizador.
-	temporizador = 0;
-
+	temporizadorEscape = 0;
+	iteracionAnterior = 0;
+	
 	// Tiempo de escape.
-	tiempoEscape = 4000;
+	tiempoEscape = 3000;
+
+	// Tiempo de delay.
+	delay = 0;
+
+	// Selecciones a 0.
+	fichaSeleccionada1 = 0;
+	fichaSeleccionada2 = 0;
 }
 
 // Destructor.
 Juego::~Juego()
 {
 	// Liberar la memoria.
+	SDL_Quit();
 }
 
 // Inicializa SDL
@@ -51,7 +62,7 @@ void Juego::inicializaSDL()
 	}
 
 	// Establecemos un nombre y un icono para la ventana creada.
-	SDL_WM_SetCaption ((char *) "ME Puzle", (char *) "ME Puzle");
+	SDL_WM_SetCaption ((char *) "Nine-Key Puzzle", (char *) "Nine-Key Puzzle");
 
 	// Activamos el modo de vídeo.
 	SURFscreen = SDL_SetVideoMode (800, 600, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
@@ -76,31 +87,44 @@ void Juego::inicializaSDL()
 		exit(1);
 	}
 
-	// Cargamos el tipo de fuente.
+	
+	TTF_Font* FONTfuente = NULL;
+	SDL_Color color;
+
+	// Texto saliendo.
 	FONTfuente = TTF_OpenFont("data/dejavu.ttf",12);
 	if (FONTfuente == NULL)
 	{
 		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
+	color.r = 0;
+	color.g = 0;
+	color.b = 0;
+	SURFsaliendo = TTF_RenderText_Blended(FONTfuente, "Saliendo...", color);
+
+	// Texto completado.
+	FONTfuente = TTF_OpenFont("data/dejavu.ttf",80);
+	if (FONTfuente == NULL)
+	{
+		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
+		exit(1);
+	}
+	color.r = 0;
+	color.g = 155;
+	color.b = 0;
+	SURFcompletado = TTF_RenderText_Blended(FONTfuente, "COMPLETADO", color);
+
 
 	// Cargamos los sonidos.
-	intercambiar.cargar("data/intercambiar.wav");
-	seleccionar.cargar("data/seleccionar.wav");
-	menu.cargar("data/menu.wav");
+	sIntercambiar.cargar("data/intercambiar.wav");
+	sSeleccionar.cargar("data/seleccionar.wav");
+	sMenu.cargar("data/menu.wav");
+	sRemover.cargar("data/remover.wav");
+	sVictoria.cargar("data/victoria.wav");
 
 	// Repetición de teclas.
-	SDL_EnableKeyRepeat(100, 100);
-
-	// fgcolor
-	fgcolor.r = 0;
-	fgcolor.g = 0;
-	fgcolor.b = 0;
-
-	// bgcolor
-	bgcolor.r = 255;
-	bgcolor.g = 255;
-	bgcolor.b = 255;
+	SDL_EnableKeyRepeat(100, 100);	
 }
 
 // Inicia el juego.
@@ -111,30 +135,37 @@ void Juego::iniciar()
 
 	while(salir==false)
 	{
+		iteracionAnterior = SDL_GetTicks();
 		switch(estado)
 		{
 			case 0:
 			{
-				// Procesamos los eventos del menú.
-				eventosMenu();
+				while (SDL_GetTicks() - iteracionAnterior < 100)
+				{
+					// Procesamos los eventos del menú.
+					eventosMenu();
 
-				// Actualizamos el menu.
-				actualizarMenu();
+					// Actualizamos el menu.
+					actualizarMenu();
 
-				// Hacemos un render.
-				renderMenu();
+					// Hacemos un render.
+					renderMenu();
+				}
 			}
 			break;
 			case 1:
 			{
-				// Procesamos los eventos del juego.
-				eventosJuego();
+				while (SDL_GetTicks() - iteracionAnterior < 100)
+				{
+					// Procesamos los eventos del juego.
+					eventosJuego();
 
-				// Actualizamos el juego.
-				actualizarJuego();
+					// Actualizamos el juego.
+					actualizarJuego();
 
-				// Hacemos un render.
-				renderJuego();
+					// Hacemos un render.
+					renderJuego();
+				}
 			}
 			break;
 			default:
@@ -169,8 +200,11 @@ void Juego::eventosMenu()
 				else
 					numPuzleActual--;
 
+				// Añadimos el delay de 140.
+				delay = 140;
+				
 				// Reproducimos el sonido.
-				menu.reproducir();
+				sMenu.reproducir();
 
 			}
 			else if (event.key.keysym.sym == SDLK_KP3)
@@ -202,11 +236,14 @@ void Juego::eventosMenu()
 
 				if(encontrado == true)
 				{
+					// Removemos el puzle.
+					puzleActual.remover();
+					
 					// Pasamos a jugar.
 					estado = 1;
 
 					// Reproducimos el sonido.
-					seleccionar.reproducir();
+					sRemover.reproducir();
 				}
 				else
 				{
@@ -232,8 +269,11 @@ void Juego::eventosMenu()
 				else
 					numPuzleActual++;
 
+				// Añadimos el delay de -140.
+				delay = -140;
+
 				// Reproducimos el sonido.
-				menu.reproducir();
+				sMenu.reproducir();
 
 			}
 			else if (event.key.keysym.sym == SDLK_KP9)
@@ -241,8 +281,8 @@ void Juego::eventosMenu()
 				// Pulsada tecla 9.
 
 				// Al pulsar la tecla 9 se activa un temporizador para forzar la salida.
-				if(temporizador == 0)
-					temporizador = SDL_GetTicks();
+				if(temporizadorEscape == 0)
+					temporizadorEscape = SDL_GetTicks();
 			}
 		}
 		else if (event.type == SDL_KEYUP)
@@ -252,7 +292,7 @@ void Juego::eventosMenu()
 				// Soltada tecla 9.
 
 				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
-				temporizador = 0;
+				temporizadorEscape = 0;
 			}
 
 		}
@@ -267,11 +307,11 @@ void Juego::eventosMenu()
 void Juego::actualizarMenu()
 {
 	// Comprobamos si la tecla de forzar salida lleva pulsada suficiente tiempo
-	if(temporizador != 0)
+	if(temporizadorEscape != 0)
 	{
-		if(SDL_GetTicks() - temporizador > (unsigned)tiempoEscape)
+		if(SDL_GetTicks() - temporizadorEscape > (unsigned)tiempoEscape)
 		{
-			temporizador = 0;
+			temporizadorEscape = 0;
 			salir = true;
 		}
 	}
@@ -291,85 +331,36 @@ void Juego::renderMenu()
 	int explorandoPosicion = 0;
 	while( pos != puzles.end())
 	{
-		Puzle activo = *pos;
-
-		// Calculamos la posición que toca.
+		Puzle activo(*pos);
+		// Calculamos la posición de la miniatura.
 		SDL_Rect posicion;
 		posicion.x = 50;
-		posicion.y = 250 - 150*(explorandoPosicion - numPuzleActual);
-
-		// Obtenemos la ruta del puzle.
-		string rutaImagen = "puzles/"+activo.getRuta()+"/pequeno.bmp";
-
-		// Cargamos la miniatura.
-		SDL_Surface *miniatura = SDL_LoadBMP(rutaImagen.c_str());
-		if (miniatura == NULL)
-		{
-			printf("No pude cargar gráfico: %s\n", SDL_GetError());
-			exit(1);
-		} ;
-
+		posicion.y = 250 - 150*(explorandoPosicion - numPuzleActual) + delay;
+		
 		// Dibujamos la miniatura.
-		SDL_BlitSurface(miniatura, NULL, SURFscreen, &posicion);
-
+		SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+	
 		if(explorandoPosicion == numPuzleActual)
 		{
 			// También lo dibujamos en grande.
 			posicion.x = 250;
 			posicion.y = 50;
-		
-			// Obtenemos la ruta del puzle.
-			string rutaImagen = "puzles/"+activo.getRuta()+"/grande.bmp";
 
-			// Cargamos la miniatura.
-			SDL_Surface *imagen = SDL_LoadBMP(rutaImagen.c_str());
-			if (imagen == NULL)
-			{
-				printf("No pude cargar gráfico: %s\n", SDL_GetError());
-				exit(1);
-			} ;
 			// Dibujamos la imagen.
-			SDL_BlitSurface(imagen, NULL, SURFscreen, &posicion);
+			SDL_BlitSurface(activo.getGrande(), NULL, SURFscreen, &posicion);
 		}
-
 		explorandoPosicion++;
 		pos++;
 	}
 
-	
-	// Mostramos el tiempo restante para salir.
-	if(temporizador != 0)
-	{
-		// Variables locales.
-		SDL_Rect *rectangulo = new SDL_Rect;
+	// Decrementamos el delay hasta 0.
+	if(delay>0)
+		delay = delay - 10;
+	if(delay<0)
+		delay = delay + 10;
 
-		// Fondo.
-		rectangulo->h = 20;
-		rectangulo->w = 100;
-		rectangulo->x = 650;
-		rectangulo->y = 15;
-		SDL_FillRect (SURFscreen, rectangulo, SDL_MapRGB (SURFscreen->format, 0, 100, 0));
-
-		// Obtenemos el porcentaje completado.
-		float tiempoTranscurrido = SDL_GetTicks() - temporizador;
-		float porcentajeCompletado = tiempoTranscurrido/tiempoEscape;
-
-		// Superficie.
-		rectangulo->h = 20;
-		rectangulo->w = 100 * porcentajeCompletado;
-		rectangulo->x = 650;
-		rectangulo->y = 15;
-		SDL_FillRect (SURFscreen, rectangulo, SDL_MapRGB (SURFscreen->format, 255, 0, 0));
-
-		// Texto.
-		SURFtexto = TTF_RenderText_Blended(FONTfuente, "Saliendo...", fgcolor);
-		RECTtexto.h = SURFtexto->h;
-		RECTtexto.w = SURFtexto->w;
-		RECTtexto.x = rectangulo->x+20;
-		RECTtexto.y = rectangulo->y+2;
-		SDL_BlitSurface(SURFtexto, NULL,SURFscreen,&RECTtexto);
-
-	}
+	// Dibujamos el progreso de salir.
+	dibujarProgresoSalir();
 
 	// Refrescamos la pantalla.
 	SDL_Flip (SURFscreen);
@@ -384,63 +375,144 @@ SDL_Event event;
 	{
 		if (event.type == SDL_KEYDOWN)
 		{
-			if (event.key.keysym.sym == SDLK_KP1)
-			{
-				// Pulsada tecla 1.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP2)
-			{
-				// Pulsada tecla 2.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP3)
-			{
-				// Pulsada tecla 3.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP4)
-			{
-				// Pulsada tecla 4.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP5)
-			{
-				// Pulsada tecla 5.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP6)
-			{
-				// Pulsada tecla 6.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP7)
-			{
-				// Pulsada tecla 7.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP8)
-			{
-				// Pulsada tecla 8.
-
-			}
-			else if (event.key.keysym.sym == SDLK_KP9)
+			if (event.key.keysym.sym == SDLK_KP9)
 			{
 				// Pulsada tecla 9.
 
 				// Al pulsar la tecla 9 se activa un temporizador para forzar la salida.
-				if(temporizador == 0)
-					temporizador = SDL_GetTicks();
+				if(temporizadorEscape == 0)
+					temporizadorEscape = SDL_GetTicks();
 			}
 		}
 		else if (event.type == SDL_KEYUP)
 		{
+			if (event.key.keysym.sym == SDLK_KP1)
+			{
+				// Soltada tecla 1.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 1;
+				}
+				else
+				{
+					fichaSeleccionada2 = 1;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP2)
+			{
+				// Soltada tecla 2.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 2;
+				}
+				else
+				{
+					fichaSeleccionada2 = 2;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP3)
+			{
+				// Soltada tecla 3.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 3;
+				}
+				else
+				{
+					fichaSeleccionada2 = 3;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP4)
+			{
+				// Soltada tecla 4.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 4;
+				}
+				else
+				{
+					fichaSeleccionada2 = 4;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP5)
+			{
+				// Soltada tecla 5.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 5;
+				}
+				else
+				{
+					fichaSeleccionada2 = 5;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP6)
+			{
+				// Soltada tecla 6.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 6;
+				}
+				else
+				{
+					fichaSeleccionada2 = 6;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP7)
+			{
+				// Soltada tecla 7.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 7;
+				}
+				else
+				{
+					fichaSeleccionada2 = 7;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
+			else if (event.key.keysym.sym == SDLK_KP8)
+			{
+				// Soltada tecla 8.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 8;
+				}
+				else
+				{
+					fichaSeleccionada2 = 8;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
+
+			}
 			if (event.key.keysym.sym == SDLK_KP9)
 			{
 				// Soltada tecla 9.
+				if(fichaSeleccionada1 == 0)
+				{
+					fichaSeleccionada1 = 9;
+				}
+				else
+				{
+					fichaSeleccionada2 = 9;
+					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+				}
 
 				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
-				temporizador = 0;
+				temporizadorEscape = 0;
 			}
 
 		}
@@ -455,13 +527,32 @@ SDL_Event event;
 void Juego::actualizarJuego()
 {
 	// Comprobamos si la tecla de forzar salida lleva pulsada suficiente tiempo
-	if(temporizador != 0)
+	if(temporizadorEscape != 0)
 	{
-		if(SDL_GetTicks() - temporizador > (unsigned)tiempoEscape)
+		if(SDL_GetTicks() - temporizadorEscape > (unsigned)tiempoEscape)
 		{
-			temporizador = 0;
+			temporizadorEscape = 0;
 			estado = 0;
 		}
+	}
+
+	// Comprobamos si el puzle está solucionado.
+	if(puzleActual.solucionado() == true)
+	{
+		// Reproducimos el sonido de victoria.
+		sVictoria.reproducir();
+
+		// Hacemos un render con el texto de la victoria.
+		renderJuego();
+
+		// Detenemos el juego durante un tiempo.
+		iteracionAnterior = SDL_GetTicks();
+
+		// Detenemos la partida 100 ms.
+		while (SDL_GetTicks() - iteracionAnterior < 3000){  }
+
+		// Volvemos al menú.
+		estado = 0;
 	}
 }
 
@@ -475,8 +566,38 @@ void Juego::renderJuego()
 	SDL_BlitSurface(SURFfondo, NULL, SURFscreen, NULL);
 
 	// Dibujamos el puzle actual.
-	puzleActual.dibujar();
+	for(int i=0; i<3; i++)
+	{
+		for(int j=0; j<3; j++)
+		{
 
+			// Calculamos la posición de la pieza.
+			SDL_Rect posicion;
+			posicion.x = 200 + 200*j;
+			posicion.y = 200*i;
+
+			// Dibujamos la pieza.
+			SDL_BlitSurface(puzleActual.getPieza(puzleActual.estado[i][j]), NULL, SURFscreen, &posicion);
+
+		}
+	}
+
+	// Dibujamos el progreso de salir.
+	dibujarProgresoSalir();
+
+	// Comprobamos si el puzle está solucionado.
+	if(puzleActual.solucionado() == true)
+	{
+		// Mostramos el texto "Puzle resuelto".
+
+		SDL_Rect rectangulo;
+		rectangulo.h = SURFcompletado->h;
+		rectangulo.w = SURFcompletado->w;
+		rectangulo.x = 210;
+		rectangulo.y = 250;
+		SDL_BlitSurface(SURFcompletado, NULL, SURFscreen, &rectangulo);
+	}
+	
 	// Refrescamos la pantalla.
 	SDL_Flip (SURFscreen);
 }
@@ -499,5 +620,84 @@ void Juego::cargarPuzles()
 			
 		}
 		pos++;
+	}
+}
+
+// Intercambia dos fichas.
+void Juego::intercambiar(int posicionInicio, int posicionDestino)
+{
+	int contador = 1;
+	int piezaInicio = 0;
+	int piezaDestino = 0;
+	for(int i=2; i>=0; i--)
+	{
+		for(int j=0; j<3; j++)
+		{
+			if(contador == posicionInicio)
+				piezaInicio = puzleActual.estado[i][j];
+
+			if(contador == posicionDestino)
+				piezaDestino = puzleActual.estado[i][j];
+			contador++;
+		}
+	}
+
+	contador = 1;
+	for(int i=2; i>=0; i--)
+	{
+		for(int j=0; j<3; j++)
+		{
+			if(contador == posicionInicio)
+				puzleActual.estado[i][j] = piezaDestino;
+
+			if(contador == posicionDestino)
+				puzleActual.estado[i][j] = piezaInicio;
+			contador++;
+		}
+	}
+
+	// Reproducimos el sonido de intercambiar fichas.
+	sIntercambiar.reproducir();
+
+	// Reiniciamos las fichas seleccionadas.
+	fichaSeleccionada1 = 0;
+	fichaSeleccionada2 = 0;
+}
+
+void Juego::dibujarProgresoSalir()
+{
+	// Mostramos el tiempo restante para salir.
+	if(temporizadorEscape != 0)
+	{
+		// Obtenemos el porcentaje completado.
+		float tiempoTranscurrido = SDL_GetTicks() - temporizadorEscape;
+		float porcentajeCompletado = tiempoTranscurrido/tiempoEscape;
+
+		if(porcentajeCompletado >= 0.1)
+		{
+			// Variables locales.
+			SDL_Rect rectangulo;
+
+			// Fondo.
+			rectangulo.h = 20;
+			rectangulo.w = 100;
+			rectangulo.x = 650;
+			rectangulo.y = 15;
+			SDL_FillRect (SURFscreen, &rectangulo, SDL_MapRGB (SURFscreen->format, 0, 100, 0));
+
+			// Superficie.
+			rectangulo.h = 20;
+			rectangulo.w = 100 * porcentajeCompletado;
+			rectangulo.x = 650;
+			rectangulo.y = 15;
+			SDL_FillRect (SURFscreen, &rectangulo, SDL_MapRGB (SURFscreen->format, 255, 0, 0));
+
+			// Texto.
+			rectangulo.h = SURFsaliendo->h;
+			rectangulo.w = SURFsaliendo->w;
+			rectangulo.x = rectangulo.x+20;
+			rectangulo.y = rectangulo.y+2;
+			SDL_BlitSurface(SURFsaliendo, NULL, SURFscreen, &rectangulo);
+		}
 	}
 }

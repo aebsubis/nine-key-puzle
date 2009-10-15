@@ -27,6 +27,9 @@ public:
 	// Inicia el juego.
 	void iniciar();
 
+	// Intercambia la posición de dos piezas.
+	void intercambiar(int posicionInicio, int posicionDestino);
+
 private:
 
 	// Inicializa SDL.
@@ -52,6 +55,9 @@ private:
 
 	// Carga todos los puzles.
 	void cargarPuzles();
+
+	// Dibuja la barra de progreso para salir
+	void dibujarProgresoSalir();
 	
 	// Listado de puzles disponibles.
 	list<Puzle> puzles;
@@ -80,23 +86,34 @@ private:
 	// Superficie de juego.
 	SDL_Surface *SURFjuego;
 
-	// Texto, color, fuente y superficie de texto.
-	SDL_Surface *SURFtexto;
-	SDL_Rect RECTtexto;
-	SDL_Color bgcolor,fgcolor;
-	TTF_Font *FONTfuente;
+	// Texto saliendo.
+	SDL_Surface *SURFsaliendo;
+
+	// Texto completado.
+	SDL_Surface *SURFcompletado;
 
 	// Sonidos
-	Sonido intercambiar;
-	Sonido seleccionar;
-	Sonido menu;
+	Sonido sIntercambiar;
+	Sonido sSeleccionar;
+	Sonido sMenu;
+	Sonido sRemover;
+	Sonido sVictoria;
 
 	// Contadores.
-	Uint32 temporizador;
+	Uint32 temporizadorEscape;
+	Uint32 iteracionAnterior;
 
 	// Tiempo de escape.
 	int tiempoEscape;
+
+	// Tiempo de delay en desplazamiento.
+	int delay;
+
+	// Ficha seleccionada 1.
+	int fichaSeleccionada1;
+
+	// Ficha seleccionada 2.
+	int fichaSeleccionada2;
 };
 
 #endif	/* _JUEGO_H */
-

@@ -1,5 +1,5 @@
 #include "Puzle.h"
-
+#include <sstream>
 
 // Constructor por defecto.
 Puzle::Puzle()
@@ -16,6 +16,12 @@ Puzle::Puzle()
 			contador++;
 		}
 	}
+
+	grande = NULL;
+	medio = NULL;
+	pequeno = NULL;
+	for(int i=0; i<9; i++)
+		piezas[i] = NULL;
 }
 
 // Constructor sobrecargado.
@@ -33,6 +39,44 @@ Puzle::Puzle(string ruta)
 			contador++;
 		}
 	}
+
+	// Cargamos las imágenes.
+	string rutaImagen = "";
+	
+	rutaImagen = "puzles/"+ruta+"/grande.bmp";
+	grande = SDL_LoadBMP(rutaImagen.c_str());
+	if (grande == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	};
+
+	rutaImagen = "puzles/"+ruta+"/medio.bmp";
+	medio = SDL_LoadBMP(rutaImagen.c_str());
+	if (medio == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	};
+
+	rutaImagen = "puzles/"+ruta+"/pequeno.bmp";
+	pequeno = SDL_LoadBMP(rutaImagen.c_str());
+	if (pequeno == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	};
+	
+	// Cargamos las piezas.
+	for(int i=0; i<9; i++)
+	{
+		std::ostringstream stm;
+		stm << i+1;
+		rutaImagen = "puzles/"+ruta+"/"+stm.str()+".bmp";
+		piezas[i] = SDL_LoadBMP(rutaImagen.c_str());
+	}
+
+
 }
 
 // Constructor de copia.
@@ -55,6 +99,42 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 			}
 		}
 
+		// Cargamos las imágenes.
+		string rutaImagen = "";
+
+		rutaImagen = "puzles/"+ruta+"/grande.bmp";
+		grande = SDL_LoadBMP(rutaImagen.c_str());
+		if (grande == NULL)
+		{
+			printf("No pude cargar gráfico: %s\n", SDL_GetError());
+			exit(1);
+		};
+
+		rutaImagen = "puzles/"+ruta+"/medio.bmp";
+		medio = SDL_LoadBMP(rutaImagen.c_str());
+		if (medio == NULL)
+		{
+			printf("No pude cargar gráfico: %s\n", SDL_GetError());
+			exit(1);
+		};
+
+		rutaImagen = "puzles/"+ruta+"/pequeno.bmp";
+		pequeno = SDL_LoadBMP(rutaImagen.c_str());
+		if (pequeno == NULL)
+		{
+			printf("No pude cargar gráfico: %s\n", SDL_GetError());
+			exit(1);
+		};
+
+		// Cargamos las piezas.
+		for(int i=0; i<9; i++)
+		{
+			std::ostringstream stm;
+			stm << i+1;
+			rutaImagen = "puzles/"+ruta+"/"+stm.str()+".bmp";
+			piezas[i] = SDL_LoadBMP(rutaImagen.c_str());
+		}
+
 	}
 	return *this;
 }
@@ -63,6 +143,11 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 Puzle::~Puzle()
 {
 	// Liberar memoria.
+	SDL_FreeSurface(grande);
+	SDL_FreeSurface(medio);
+	SDL_FreeSurface(pequeno);
+	for(int i=0; i<9; i++)
+		SDL_FreeSurface(piezas[i]);
 }
 
 
@@ -78,24 +163,82 @@ void Puzle::setRuta(string ruta)
 	this->ruta = ruta;
 }
 
+// Devuelve la superficie de la imagen pequeña.
+SDL_Surface* Puzle::getPequeno() const
+{
+	return pequeno;
+}
+
+// Devuelve la superficie de la imagen mediana.
+SDL_Surface* Puzle::getMedio() const
+{
+	return medio;
+}
+
+// Devuelve la superficie de la imagen grande.
+SDL_Surface* Puzle::getGrande() const
+{
+	return grande;
+}
+
+// Devuelve la superficie de la pieza seleccionada.
+SDL_Surface* Puzle::getPieza(int numPieza) const
+{
+	if(numPieza>0 && numPieza<=9)
+		return piezas[numPieza-1];
+	else
+		return NULL;
+}
+
 // Remueve las fichas.
 void Puzle::remover()
 {
+	// Creamos un vector ordenado del 1 al 9.
+	int fichas[9];
+	for(int i = 0; i<9; i++)
+		fichas[i] = i+1;
 
-}
+	int numIntercambios = 50;
+	for(int i=0; i<numIntercambios; i++)
+	{
+		int pos1 = rand()%9;
+		int pos2 = rand()%9;
+		int aux = 0;
+		
+		// Intercambiamos las 2 posiciones.
+		aux = fichas[pos2];
+		fichas[pos2] = fichas[pos1];
+		fichas[pos1] = aux;
+	}
 
-
-void Puzle::dibujar() const
-{
+	// Asignamos la nueva distribución.
+	int contador = 0;
 	for(int i=0; i<3; i++)
 	{
 		for(int j=0; j<3; j++)
 		{
-			cout << estado[i][j] << " ";
+			estado[i][j] = fichas[contador];
+			contador++;
 		}
-		cout << endl;
 	}
-	cout << endl;
-	cout << "----" << endl;
-	cout << endl;
 }
+
+// Indica si el puzle está solucionado.
+bool Puzle::solucionado() const
+{
+	// Puzle solucionado
+	bool solucionado = true;
+	int contador = 1;
+	for(int i=0; i<3 && solucionado == true; i++)
+	{
+		for(int j=0; j<3 && solucionado == true; j++)
+		{
+			if(estado[i][j] != contador)
+				solucionado = false;
+			contador++;
+		}
+	}
+
+	return solucionado;
+}
+

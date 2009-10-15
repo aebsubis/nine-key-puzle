@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include "SDL.h"
 using namespace std;
 
 /* Clase puzle.
@@ -33,19 +34,37 @@ public:
 	// Establece la ruta.
 	void setRuta(string ruta);
 
+	// Devuelve la superficie de la imagen pequeña.
+	SDL_Surface* getPequeno() const;
+
+	// Devuelve la superficie de la imagen mediana.
+	SDL_Surface* getMedio() const;
+
+	// Devuelve la superficie de la imagen grande.
+	SDL_Surface* getGrande() const;
+
+	// Devuelve la superficie de la pieza seleccionada.
+	SDL_Surface* getPieza(int numPieza) const;
+
 	// Remueve las piezas del puzle.
 	void remover();
 
-	// Dibuja el puzle.
-	void dibujar() const;
+	// Matriz del estado puzle.
+	int estado[3][3];
+
+	// Indica si el puzle está solucionado.
+	bool solucionado() const;
 
 private:
 
 	// Ruta del puzle.
 	string ruta;
 
-	// Matriz del estado puzle.
-	int estado[3][3];
+	// Imagenes del puzle.
+	SDL_Surface* grande;
+	SDL_Surface* medio;
+	SDL_Surface* pequeno;
+	SDL_Surface* piezas[9];
 };
 
 
