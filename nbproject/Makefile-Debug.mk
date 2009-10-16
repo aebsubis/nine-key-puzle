@@ -55,11 +55,11 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	${MAKE}  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/puzle
+	${MAKE}  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/nine-key-puzle
 
-dist/Debug/GNU-Linux-x86/puzle: ${OBJECTFILES}
+dist/Debug/GNU-Linux-x86/nine-key-puzle: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug/GNU-Linux-x86
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/puzle ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nine-key-puzle ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 ${OBJECTDIR}/src/Puzle.o: nbproject/Makefile-${CND_CONF}.mk src/Puzle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
@@ -87,7 +87,7 @@ ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp
 # Clean Targets
 .clean-conf:
 	${RM} -r build/Debug
-	${RM} dist/Debug/GNU-Linux-x86/puzle
+	${RM} dist/Debug/GNU-Linux-x86/nine-key-puzle
 
 # Subprojects
 .clean-subprojects:

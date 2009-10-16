@@ -43,7 +43,7 @@ Puzle::Puzle(string ruta)
 	// Cargamos las imágenes.
 	string rutaImagen = "";
 	
-	rutaImagen = "puzles/"+ruta+"/grande.png";
+	rutaImagen = "puzles/"+ruta+"/grande.jpg";
 	grande = IMG_Load(rutaImagen.c_str());
 	if (grande == NULL)
 	{
@@ -51,7 +51,7 @@ Puzle::Puzle(string ruta)
 		exit(1);
 	};
 
-	rutaImagen = "puzles/"+ruta+"/medio.png";
+	rutaImagen = "puzles/"+ruta+"/medio.jpg";
 	medio = IMG_Load(rutaImagen.c_str());
 	if (medio == NULL)
 	{
@@ -59,7 +59,7 @@ Puzle::Puzle(string ruta)
 		exit(1);
 	};
 
-	rutaImagen = "puzles/"+ruta+"/pequeno.png";
+	rutaImagen = "puzles/"+ruta+"/pequeno.jpg";
 	pequeno = IMG_Load(rutaImagen.c_str());
 	if (pequeno == NULL)
 	{
@@ -72,7 +72,7 @@ Puzle::Puzle(string ruta)
 	{
 		std::ostringstream stm;
 		stm << i+1;
-		rutaImagen = "puzles/"+ruta+"/"+stm.str()+".png";
+		rutaImagen = "puzles/"+ruta+"/"+stm.str()+".jpg";
 		piezas[i] = IMG_Load(rutaImagen.c_str());
 	}
 
@@ -102,7 +102,7 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 		// Cargamos las imágenes.
 		string rutaImagen = "";
 
-		rutaImagen = "puzles/"+ruta+"/grande.png";
+		rutaImagen = "puzles/"+ruta+"/grande.jpg";
 		grande = IMG_Load(rutaImagen.c_str());
 		if (grande == NULL)
 		{
@@ -110,7 +110,7 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 			exit(1);
 		};
 
-		rutaImagen = "puzles/"+ruta+"/medio.png";
+		rutaImagen = "puzles/"+ruta+"/medio.jpg";
 		medio = IMG_Load(rutaImagen.c_str());
 		if (medio == NULL)
 		{
@@ -118,7 +118,7 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 			exit(1);
 		};
 
-		rutaImagen = "puzles/"+ruta+"/pequeno.png";
+		rutaImagen = "puzles/"+ruta+"/pequeno.jpg";
 		pequeno = IMG_Load(rutaImagen.c_str());
 		if (pequeno == NULL)
 		{
@@ -131,7 +131,7 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 		{
 			std::ostringstream stm;
 			stm << i+1;
-			rutaImagen = "puzles/"+ruta+"/"+stm.str()+".png";
+			rutaImagen = "puzles/"+ruta+"/"+stm.str()+".jpg";
 			piezas[i] = IMG_Load(rutaImagen.c_str());
 		}
 

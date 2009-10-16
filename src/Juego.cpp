@@ -68,7 +68,7 @@ void Juego::inicializaSDL()
 	}
 
 	// Cargamos la imagen de fondo.
-	SURFfondo = IMG_Load("data/fondo.png");
+	SURFfondo = IMG_Load("data/fondo.jpg");
 	if (SURFfondo == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
