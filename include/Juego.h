@@ -98,6 +98,7 @@ private:
 	Sonido sMenu;
 	Sonido sRemover;
 	Sonido sVictoria;
+        Sonido sFondo;
 
 	// Contadores.
 	Uint32 temporizadorEscape;

@@ -122,6 +122,7 @@ void Juego::inicializaSDL()
 	sMenu.cargar("data/menu.wav");
 	sRemover.cargar("data/remover.wav");
 	sVictoria.cargar("data/victoria.wav");
+        sFondo.cargar("data/fondo.wav");
 
 	// Repetición de teclas.
 	SDL_EnableKeyRepeat(100, 100);	
@@ -136,6 +137,8 @@ void Juego::iniciar()
 	while(salir==false)
 	{
 		iteracionAnterior = SDL_GetTicks();
+                if(sFondo.reproduciendose() == false)
+                    sFondo.reproducir();
 		switch(estado)
 		{
 			case 0:
