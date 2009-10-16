@@ -43,24 +43,24 @@ Puzle::Puzle(string ruta)
 	// Cargamos las imágenes.
 	string rutaImagen = "";
 	
-	rutaImagen = "puzles/"+ruta+"/grande.bmp";
-	grande = SDL_LoadBMP(rutaImagen.c_str());
+	rutaImagen = "puzles/"+ruta+"/grande.png";
+	grande = IMG_Load(rutaImagen.c_str());
 	if (grande == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	};
 
-	rutaImagen = "puzles/"+ruta+"/medio.bmp";
-	medio = SDL_LoadBMP(rutaImagen.c_str());
+	rutaImagen = "puzles/"+ruta+"/medio.png";
+	medio = IMG_Load(rutaImagen.c_str());
 	if (medio == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	};
 
-	rutaImagen = "puzles/"+ruta+"/pequeno.bmp";
-	pequeno = SDL_LoadBMP(rutaImagen.c_str());
+	rutaImagen = "puzles/"+ruta+"/pequeno.png";
+	pequeno = IMG_Load(rutaImagen.c_str());
 	if (pequeno == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
@@ -72,8 +72,8 @@ Puzle::Puzle(string ruta)
 	{
 		std::ostringstream stm;
 		stm << i+1;
-		rutaImagen = "puzles/"+ruta+"/"+stm.str()+".bmp";
-		piezas[i] = SDL_LoadBMP(rutaImagen.c_str());
+		rutaImagen = "puzles/"+ruta+"/"+stm.str()+".png";
+		piezas[i] = IMG_Load(rutaImagen.c_str());
 	}
 
 
@@ -102,24 +102,24 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 		// Cargamos las imágenes.
 		string rutaImagen = "";
 
-		rutaImagen = "puzles/"+ruta+"/grande.bmp";
-		grande = SDL_LoadBMP(rutaImagen.c_str());
+		rutaImagen = "puzles/"+ruta+"/grande.png";
+		grande = IMG_Load(rutaImagen.c_str());
 		if (grande == NULL)
 		{
 			printf("No pude cargar gráfico: %s\n", SDL_GetError());
 			exit(1);
 		};
 
-		rutaImagen = "puzles/"+ruta+"/medio.bmp";
-		medio = SDL_LoadBMP(rutaImagen.c_str());
+		rutaImagen = "puzles/"+ruta+"/medio.png";
+		medio = IMG_Load(rutaImagen.c_str());
 		if (medio == NULL)
 		{
 			printf("No pude cargar gráfico: %s\n", SDL_GetError());
 			exit(1);
 		};
 
-		rutaImagen = "puzles/"+ruta+"/pequeno.bmp";
-		pequeno = SDL_LoadBMP(rutaImagen.c_str());
+		rutaImagen = "puzles/"+ruta+"/pequeno.png";
+		pequeno = IMG_Load(rutaImagen.c_str());
 		if (pequeno == NULL)
 		{
 			printf("No pude cargar gráfico: %s\n", SDL_GetError());
@@ -131,8 +131,8 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 		{
 			std::ostringstream stm;
 			stm << i+1;
-			rutaImagen = "puzles/"+ruta+"/"+stm.str()+".bmp";
-			piezas[i] = SDL_LoadBMP(rutaImagen.c_str());
+			rutaImagen = "puzles/"+ruta+"/"+stm.str()+".png";
+			piezas[i] = IMG_Load(rutaImagen.c_str());
 		}
 
 	}

@@ -4,10 +4,13 @@
 #include <iostream>
 #include <list>
 #include <SDL/SDL_video.h>
+#include <SDL/SDL_events.h>
 #include "SDL.h"
-#include "SDL_ttf.h"
+#include "SDL/SDL_ttf.h"
+#include "SDL/SDL_image.h"
 #include "Puzle.h"
 #include "Sonido.h"
+#include "Directorio.h"
 
 using namespace std;
 
@@ -92,6 +95,9 @@ private:
 	// Texto completado.
 	SDL_Surface *SURFcompletado;
 
+	// Superficie translucida.
+	SDL_Surface *SURFtranslucida;
+	
 	// Sonidos
 	Sonido sIntercambiar;
 	Sonido sSeleccionar;

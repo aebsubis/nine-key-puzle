@@ -1,12 +1,6 @@
-#include <list>
 #include <sstream>
 #include <SDL/SDL_video.h>
-#include <SDL/SDL_events.h>
-#include <SDL/SDL.h>
-#include "SDL.h"
-#include "SDL_ttf.h"
 #include "Juego.h"
-#include "Directorio.h"
 
 // Constructor por defecto.
 Juego::Juego()
@@ -28,6 +22,7 @@ Juego::Juego()
 	SURFfondo = NULL;
 	SURFsaliendo = NULL;
 	SURFcompletado = NULL;
+	SURFtranslucida = NULL;
 
 	// Iniciamos el temporizador.
 	temporizadorEscape = 0;
@@ -73,20 +68,27 @@ void Juego::inicializaSDL()
 	}
 
 	// Cargamos la imagen de fondo.
-	SURFfondo = SDL_LoadBMP("data/fondo.bmp");
+	SURFfondo = IMG_Load("data/fondo.png");
 	if (SURFfondo == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	}
-	
+
+	// Creamos la superficie translúcida.
+	SURFtranslucida = IMG_Load("data/translucida.png");
+	if (SURFtranslucida == NULL)
+	{
+		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
 	// Inicializamos SDL_ttf
 	if (TTF_Init() < 0)
 	{
 		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
-
 	
 	TTF_Font* FONTfuente = NULL;
 	SDL_Color color;
@@ -98,6 +100,7 @@ void Juego::inicializaSDL()
 		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
+
 	color.r = 0;
 	color.g = 0;
 	color.b = 0;
@@ -110,6 +113,7 @@ void Juego::inicializaSDL()
 		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
+
 	color.r = 0;
 	color.g = 155;
 	color.b = 0;
@@ -122,7 +126,7 @@ void Juego::inicializaSDL()
 	sMenu.cargar("data/menu.wav");
 	sRemover.cargar("data/remover.wav");
 	sVictoria.cargar("data/victoria.wav");
-        sFondo.cargar("data/fondo.wav");
+	sFondo.cargar("data/fondo.wav");
 
 	// Repetición de teclas.
 	SDL_EnableKeyRepeat(100, 100);	
@@ -136,9 +140,13 @@ void Juego::iniciar()
 
 	while(salir==false)
 	{
+		// Reiniciamos el iterador.
 		iteracionAnterior = SDL_GetTicks();
-                if(sFondo.reproduciendose() == false)
-                    sFondo.reproducir();
+		
+		// Bucle del sonido de fondo.
+		if(sFondo.reproduciendose() == false)
+			sFondo.reproducir();
+
 		switch(estado)
 		{
 			case 0:
@@ -222,37 +230,7 @@ void Juego::eventosMenu()
 			}
 			else if (event.key.keysym.sym == SDLK_KP5)
 			{
-				// Seleccionamos el puzle actual.
-				list<Puzle>::iterator pos = puzles.begin();
-				int explorandoPosicion = 0;
-				bool encontrado = false;
-				while( pos != puzles.end() && encontrado == false)
-				{
-					if(explorandoPosicion == numPuzleActual)
-					{
-						puzleActual = *pos;
-						encontrado = true;
-					}
-					pos++;
-					explorandoPosicion++;
-				}
-
-				if(encontrado == true)
-				{
-					// Removemos el puzle.
-					puzleActual.remover();
-					
-					// Pasamos a jugar.
-					estado = 1;
-
-					// Reproducimos el sonido.
-					sRemover.reproducir();
-				}
-				else
-				{
-					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
-					salir = true;
-				}
+				// Pulsada tecla 5.
 			}
 			else if (event.key.keysym.sym == SDLK_KP6)
 			{
@@ -290,7 +268,41 @@ void Juego::eventosMenu()
 		}
 		else if (event.type == SDL_KEYUP)
 		{
-			if (event.key.keysym.sym == SDLK_KP9)
+			if (event.key.keysym.sym == SDLK_KP5)
+			{
+				// Seleccionamos el puzle actual.
+				list<Puzle>::iterator pos = puzles.begin();
+				int explorandoPosicion = 0;
+				bool encontrado = false;
+				while( pos != puzles.end() && encontrado == false)
+				{
+					if(explorandoPosicion == numPuzleActual)
+					{
+						puzleActual = *pos;
+						encontrado = true;
+					}
+					pos++;
+					explorandoPosicion++;
+				}
+
+				if(encontrado == true)
+				{
+					// Removemos el puzle.
+					puzleActual.remover();
+
+					// Pasamos a jugar.
+					estado = 1;
+
+					// Reproducimos el sonido.
+					sRemover.reproducir();
+				}
+				else
+				{
+					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
+					salir = true;
+				}
+			}
+			else if (event.key.keysym.sym == SDLK_KP9)
 			{
 				// Soltada tecla 9.
 
@@ -330,30 +342,98 @@ void Juego::renderMenu()
 	SDL_BlitSurface(SURFfondo, NULL, SURFscreen, NULL);
 
 	// Dibujamos el listado de puzles.
-	list<Puzle>::iterator pos = puzles.begin();
-	int explorandoPosicion = 0;
-	while( pos != puzles.end())
+	if(puzles.size() > 0)
 	{
-		Puzle activo(*pos);
-		// Calculamos la posición de la miniatura.
-		SDL_Rect posicion;
-		posicion.x = 50;
-		posicion.y = 250 - 150*(explorandoPosicion - numPuzleActual) + delay;
-		
-		// Dibujamos la miniatura.
-		SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
-	
-		if(explorandoPosicion == numPuzleActual)
-		{
-			// También lo dibujamos en grande.
-			posicion.x = 250;
-			posicion.y = 50;
+		// Iterador de la lista.
+		list<Puzle>::iterator pos;
 
-			// Dibujamos la imagen.
-			SDL_BlitSurface(activo.getGrande(), NULL, SURFscreen, &posicion);
+		// Almacena la posición del puzle que estamos explorando en la lista.
+		int explorandoPosicion;
+
+		// Almacena la posición de la miniatura inicial.
+		int miniaturaInicial;
+
+		// Almacena el número de la miniatura que se está dibujando.
+		int numMiniatura;
+
+		// Buscamos la posición de la miniatura inicial.
+		miniaturaInicial = numPuzleActual-3;
+		while(miniaturaInicial<0)
+		{
+			miniaturaInicial = puzles.size() + miniaturaInicial;
 		}
-		explorandoPosicion++;
-		pos++;
+
+		// Nos desplazamos hasta la miniatura inicial.
+		pos = puzles.begin();
+		explorandoPosicion = 0;
+		bool encontrado = false;
+		while( encontrado == false)
+		{
+			if(explorandoPosicion == miniaturaInicial)
+			{
+				encontrado = true;
+			}
+			else
+			{
+				explorandoPosicion++;
+				pos++;
+			}
+		}
+
+		// Dibujamos las 7 miniaturas del menú
+		numMiniatura = -3;
+		while( numMiniatura <= 3 )
+		{
+			// Obtenemos el puzzle de la lista que estamos explorando.
+			Puzle activo(*pos);
+
+			// Calculamos la posición de la miniatura.
+			SDL_Rect posicion;
+			
+			if(numMiniatura>0)
+			{
+				posicion.x = 50 + 35*abs(numMiniatura) - delay*(35.0/140.0);
+				posicion.y = 250 - 150*(numMiniatura) + delay;
+
+				// Dibujamos la miniatura.
+				SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+			}
+			else if(numMiniatura < 0)
+			{
+				posicion.x = 50 + 35*abs(numMiniatura) + delay*(35.0/140.0);
+				posicion.y = 250 - 150*(numMiniatura) + delay;
+
+				// Dibujamos la miniatura.
+				SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+			}
+			else if(numMiniatura == 0)
+			{
+				posicion.x = 50 + 35*abs(numMiniatura) + abs((int)(delay*(35.0/140.0)));
+				posicion.y = 250 - 150*(numMiniatura) + delay;
+
+				// Dibujamos la miniatura.
+				SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+
+				// También lo dibujamos en grande.
+				posicion.x = 250;
+				posicion.y = 50;
+
+				// Dibujamos la imagen.
+				SDL_BlitSurface(activo.getGrande(), NULL, SURFscreen, &posicion);
+			}
+
+			numMiniatura++;
+			explorandoPosicion++;
+			pos++;
+
+			// Si hemos completado la lista, empezamos de 0.
+			if(pos==puzles.end())
+			{
+				explorandoPosicion = 0;
+				pos=puzles.begin();
+			}
+		}
+	
 	}
 
 	// Decrementamos el delay hasta 0.
@@ -582,6 +662,28 @@ void Juego::renderJuego()
 			// Dibujamos la pieza.
 			SDL_BlitSurface(puzleActual.getPieza(puzleActual.estado[i][j]), NULL, SURFscreen, &posicion);
 
+		}
+	}
+
+	// Dibujamos la superficie translúcida si la ficha1 ha sido seleccionada.
+	if(fichaSeleccionada1 != 0)
+	{
+		int contador = 1;
+		bool dibujado = false;
+		for(int i=2; i>=0 && dibujado == false; i--)
+		{
+			for(int j=0; j<3 && dibujado == false; j++)
+			{
+				if(contador == fichaSeleccionada1)
+				{
+					SDL_Rect posicion;
+					posicion.x = 200 + 200*j;
+					posicion.y = 200*i;
+					SDL_BlitSurface(SURFtranslucida, NULL, SURFscreen, &posicion);
+					dibujado = true;
+				}
+				contador++;
+			}
 		}
 	}
 
