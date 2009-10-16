@@ -50,6 +50,9 @@ public:
 	// Remueve las piezas del puzle.
 	void remover();
 
+	// Soluciona el puzle.
+	void solucionar();
+
 	// Matriz del estado puzle.
 	int estado[3][3];
 

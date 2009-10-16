@@ -223,6 +223,21 @@ void Puzle::remover()
 	}
 }
 
+// Soluciona el puzle.
+void Puzle::solucionar()
+{
+	// Puzle solucionado
+	int contador = 1;
+	for(int i=0; i<3; i++)
+	{
+		for(int j=0; j<3; j++)
+		{
+			estado[i][j] = contador;
+			contador++;
+		}
+	}
+}
+
 // Indica si el puzle está solucionado.
 bool Puzle::solucionado() const
 {

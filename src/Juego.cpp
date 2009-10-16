@@ -42,7 +42,17 @@ Juego::Juego()
 // Destructor.
 Juego::~Juego()
 {
-	// Liberar la memoria.
+	// Liberar los puzles.
+	list<Puzle*>::iterator pos = puzles.begin();
+	while( pos != puzles.end())
+	{
+		Puzle* puzle = *pos;
+		delete puzle;
+		pos++;
+	}
+	puzles.clear();
+
+	// Liberar la memoria de SDL.
 	SDL_Quit();
 }
 
@@ -66,7 +76,7 @@ void Juego::inicializaSDL()
 		printf ("No se puede inicializar el modo gráfico: %s\n", SDL_GetError ());
 		exit (1);
 	}
-
+	
 	// Cargamos la imagen de fondo.
 	SURFfondo = IMG_Load("data/fondo.jpg");
 	if (SURFfondo == NULL)
@@ -271,7 +281,7 @@ void Juego::eventosMenu()
 			if (event.key.keysym.sym == SDLK_KP5)
 			{
 				// Seleccionamos el puzle actual.
-				list<Puzle>::iterator pos = puzles.begin();
+				list<Puzle*>::iterator pos = puzles.begin();
 				int explorandoPosicion = 0;
 				bool encontrado = false;
 				while( pos != puzles.end() && encontrado == false)
@@ -288,7 +298,7 @@ void Juego::eventosMenu()
 				if(encontrado == true)
 				{
 					// Removemos el puzle.
-					puzleActual.remover();
+					puzleActual->remover();
 
 					// Pasamos a jugar.
 					estado = 1;
@@ -345,7 +355,7 @@ void Juego::renderMenu()
 	if(puzles.size() > 0)
 	{
 		// Iterador de la lista.
-		list<Puzle>::iterator pos;
+		list<Puzle*>::iterator pos;
 
 		// Almacena la posición del puzle que estamos explorando en la lista.
 		int explorandoPosicion;
@@ -385,41 +395,41 @@ void Juego::renderMenu()
 		while( numMiniatura <= 3 )
 		{
 			// Obtenemos el puzzle de la lista que estamos explorando.
-			Puzle activo(*pos);
+			Puzle* activo = *pos;
 
 			// Calculamos la posición de la miniatura.
 			SDL_Rect posicion;
 			
 			if(numMiniatura>0)
 			{
-				posicion.x = 50 + 35*abs(numMiniatura) - delay*(35.0/140.0);
+ 				posicion.x = 50 + 35*abs(numMiniatura) - delay*0.25;
 				posicion.y = 250 - 150*(numMiniatura) + delay;
 
 				// Dibujamos la miniatura.
-				SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getPequeno(), NULL, SURFscreen, &posicion);
 			}
 			else if(numMiniatura < 0)
 			{
-				posicion.x = 50 + 35*abs(numMiniatura) + delay*(35.0/140.0);
+				posicion.x = 50 + 35*abs(numMiniatura) + delay*0.25;
 				posicion.y = 250 - 150*(numMiniatura) + delay;
 
 				// Dibujamos la miniatura.
-				SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getPequeno(), NULL, SURFscreen, &posicion);
 			}
 			else if(numMiniatura == 0)
 			{
-				posicion.x = 50 + 35*abs(numMiniatura) + abs((int)(delay*(35.0/140.0)));
+				posicion.x = 50 + 35*abs(numMiniatura) + abs((int)(delay*0.25));
 				posicion.y = 250 - 150*(numMiniatura) + delay;
 
 				// Dibujamos la miniatura.
-				SDL_BlitSurface(activo.getPequeno(), NULL, SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getPequeno(), NULL, SURFscreen, &posicion);
 
 				// También lo dibujamos en grande.
 				posicion.x = 250;
 				posicion.y = 50;
 
 				// Dibujamos la imagen.
-				SDL_BlitSurface(activo.getGrande(), NULL, SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getGrande(), NULL, SURFscreen, &posicion);
 			}
 
 			numMiniatura++;
@@ -620,7 +630,7 @@ void Juego::actualizarJuego()
 	}
 
 	// Comprobamos si el puzle está solucionado.
-	if(puzleActual.solucionado() == true)
+	if(puzleActual->solucionado() == true)
 	{
 		// Reproducimos el sonido de victoria.
 		sVictoria.reproducir();
@@ -660,7 +670,7 @@ void Juego::renderJuego()
 			posicion.y = 200*i;
 
 			// Dibujamos la pieza.
-			SDL_BlitSurface(puzleActual.getPieza(puzleActual.estado[i][j]), NULL, SURFscreen, &posicion);
+			SDL_BlitSurface(puzleActual->getPieza(puzleActual->estado[i][j]), NULL, SURFscreen, &posicion);
 
 		}
 	}
@@ -691,7 +701,7 @@ void Juego::renderJuego()
 	dibujarProgresoSalir();
 
 	// Comprobamos si el puzle está solucionado.
-	if(puzleActual.solucionado() == true)
+	if(puzleActual->solucionado() == true)
 	{
 		// Mostramos el texto "Puzle resuelto".
 
@@ -720,7 +730,7 @@ void Juego::cargarPuzles()
 		if(ruta[0] != '.')
 		{
 			// Añadimos el puzle.
-			Puzle puzle(ruta);
+			Puzle* puzle = new Puzle(ruta);
 			puzles.push_front(puzle);
 			
 		}
@@ -739,10 +749,10 @@ void Juego::intercambiar(int posicionInicio, int posicionDestino)
 		for(int j=0; j<3; j++)
 		{
 			if(contador == posicionInicio)
-				piezaInicio = puzleActual.estado[i][j];
+				piezaInicio = puzleActual->estado[i][j];
 
 			if(contador == posicionDestino)
-				piezaDestino = puzleActual.estado[i][j];
+				piezaDestino = puzleActual->estado[i][j];
 			contador++;
 		}
 	}
@@ -753,10 +763,10 @@ void Juego::intercambiar(int posicionInicio, int posicionDestino)
 		for(int j=0; j<3; j++)
 		{
 			if(contador == posicionInicio)
-				puzleActual.estado[i][j] = piezaDestino;
+				puzleActual->estado[i][j] = piezaDestino;
 
 			if(contador == posicionDestino)
-				puzleActual.estado[i][j] = piezaInicio;
+				puzleActual->estado[i][j] = piezaInicio;
 			contador++;
 		}
 	}

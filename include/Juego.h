@@ -63,10 +63,10 @@ private:
 	void dibujarProgresoSalir();
 	
 	// Listado de puzles disponibles.
-	list<Puzle> puzles;
+	list<Puzle*> puzles;
 
 	// Puzle que se está jugando.
-	Puzle puzleActual;
+	Puzle* puzleActual;
 
 	// Número de puzle que se va a jugar o se está jugando.
 	int numPuzleActual;
