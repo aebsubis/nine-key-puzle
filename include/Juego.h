@@ -30,9 +30,6 @@ public:
 	// Inicia el juego.
 	void iniciar();
 
-	// Intercambia la posición de dos piezas.
-	void intercambiar(int posicionInicio, int posicionDestino);
-
 private:
 
 	// Inicializa SDL.

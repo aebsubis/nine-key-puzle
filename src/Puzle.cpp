@@ -6,39 +6,18 @@ Puzle::Puzle()
 {
 	ruta = "";
 
-	// Puzle solucionado
-	int contador = 1;
-	for(int i=0; i<3; i++)
-	{
-		for(int j=0; j<3; j++)
-		{
-			estado[i][j] = contador;
-			contador++;
-		}
-	}
-
 	grande = NULL;
 	medio = NULL;
 	pequeno = NULL;
-	for(int i=0; i<9; i++)
-		piezas[i] = NULL;
+	matriz = NULL;
+
+	tamano = 0;
 }
 
 // Constructor sobrecargado.
 Puzle::Puzle(string ruta)
 {
 	this->ruta = ruta;
-
-	// Puzle solucionado
-	int contador = 1;
-	for(int i=0; i<3; i++)
-	{
-		for(int j=0; j<3; j++)
-		{
-			estado[i][j] = contador;
-			contador++;
-		}
-	}
 
 	// Cargamos las imágenes.
 	string rutaImagen = "";
@@ -66,17 +45,9 @@ Puzle::Puzle(string ruta)
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	};
-	
-	// Cargamos las piezas.
-	for(int i=0; i<9; i++)
-	{
-		std::ostringstream stm;
-		stm << i+1;
-		rutaImagen = "puzles/"+ruta+"/"+stm.str()+".jpg";
-		piezas[i] = IMG_Load(rutaImagen.c_str());
-	}
 
-
+	matriz = NULL;
+	tamano = 0;
 }
 
 // Constructor de copia.
@@ -90,15 +61,6 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 {
 	if (this != &puzle)
 	{
-		this->ruta = puzle.ruta;
-		for(int i=0; i<3; i++)
-		{
-			for(int j=0; j<3; j++)
-			{
-				estado[i][j] = puzle.estado[i][j];
-			}
-		}
-
 		// Cargamos las imágenes.
 		string rutaImagen = "";
 
@@ -126,15 +88,11 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 			exit(1);
 		};
 
-		// Cargamos las piezas.
-		for(int i=0; i<9; i++)
-		{
-			std::ostringstream stm;
-			stm << i+1;
-			rutaImagen = "puzles/"+ruta+"/"+stm.str()+".jpg";
-			piezas[i] = IMG_Load(rutaImagen.c_str());
-		}
-
+		// Copiamos el tamaño.
+		if(puzle.getTamano() > 0)
+			setTamano(puzle.getTamano());
+		else
+			tamano = puzle.getTamano();
 	}
 	return *this;
 }
@@ -146,8 +104,9 @@ Puzle::~Puzle()
 	SDL_FreeSurface(grande);
 	SDL_FreeSurface(medio);
 	SDL_FreeSurface(pequeno);
-	for(int i=0; i<9; i++)
-		SDL_FreeSurface(piezas[i]);
+
+	if(matriz != NULL)
+		delete matriz;
 }
 
 
@@ -181,45 +140,41 @@ SDL_Surface* Puzle::getGrande() const
 	return grande;
 }
 
-// Devuelve la superficie de la pieza seleccionada.
-SDL_Surface* Puzle::getPieza(int numPieza) const
+// Devuelve el tamaño del puzle.
+int Puzle::getTamano() const
 {
-	if(numPieza>0 && numPieza<=9)
-		return piezas[numPieza-1];
-	else
-		return NULL;
+	return tamano;
+}
+
+// Establece el tamaño del puzle.
+void Puzle::setTamano(int nuevoTamano)
+{
+	// Asignamos el nuevo tamaño.
+	tamano = nuevoTamano;
+
+	// Liberamos la matriz actual.
+	if(matriz != NULL)
+		delete matriz;
+	
+	// Reservamos la matriz del nuevo tamaño.
+	matriz = new Matriz<Pieza>(tamano, tamano);
+
+	// Establecemos el estado solucionado.
+	solucionar();
 }
 
 // Remueve las fichas.
 void Puzle::remover()
 {
-	// Creamos un vector ordenado del 1 al 9.
-	int fichas[9];
-	for(int i = 0; i<9; i++)
-		fichas[i] = i+1;
-
-	int numIntercambios = 50;
-	for(int i=0; i<numIntercambios; i++)
+	int numIntercambios = tamano*50;
+	for(int i=0; i<numIntercambios; i++ )
 	{
-		int pos1 = rand()%9;
-		int pos2 = rand()%9;
-		int aux = 0;
-		
-		// Intercambiamos las 2 posiciones.
-		aux = fichas[pos2];
-		fichas[pos2] = fichas[pos1];
-		fichas[pos1] = aux;
-	}
+		int posx1 = rand()%tamano;
+		int posy1 = rand()%tamano;
+		int posx2 = rand()%tamano;
+		int posy2 = rand()%tamano;
 
-	// Asignamos la nueva distribución.
-	int contador = 0;
-	for(int i=0; i<3; i++)
-	{
-		for(int j=0; j<3; j++)
-		{
-			estado[i][j] = fichas[contador];
-			contador++;
-		}
+		intercambiar(posx1, posy1, posx2, posy2);
 	}
 }
 
@@ -227,13 +182,12 @@ void Puzle::remover()
 void Puzle::solucionar()
 {
 	// Puzle solucionado
-	int contador = 1;
-	for(int i=0; i<3; i++)
+	for(int i=0; i<tamano; i++)
 	{
-		for(int j=0; j<3; j++)
+		for(int j=0; j<tamano; j++)
 		{
-			estado[i][j] = contador;
-			contador++;
+			matriz->getPunteroElemento(i,j)->setX(i);
+			matriz->getPunteroElemento(i,j)->setY(j);
 		}
 	}
 }
@@ -243,17 +197,22 @@ bool Puzle::solucionado() const
 {
 	// Puzle solucionado
 	bool solucionado = true;
-	int contador = 1;
-	for(int i=0; i<3 && solucionado == true; i++)
+	for(int i=0; i<tamano && solucionado == true; i++)
 	{
-		for(int j=0; j<3 && solucionado == true; j++)
+		for(int j=0; j<tamano && solucionado == true; j++)
 		{
-			if(estado[i][j] != contador)
+			if( (matriz[i][j]->getX() != i) || (matriz[i][j]->getY() !=j) )
 				solucionado = false;
-			contador++;
 		}
 	}
 
 	return solucionado;
 }
 
+void Puzle::intercambiar(int posx1, int posy1, int posx2, int posy2)
+{
+	Pieza pieza1 = matriz->getElemento(posx1, posy1);
+	Pieza pieza2 = matriz->getElemento(posx2, posy2);
+	matriz->setElemento(posx1, posy1, pieza2);
+	matriz->setElemento(posx2, posy2, pieza1);
+}

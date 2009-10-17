@@ -5,6 +5,8 @@
 #include <string>
 #include "SDL.h"
 #include "SDL/SDL_image.h"
+#include "Matriz.h"
+#include "Pieza.h"
 using namespace std;
 
 /* Clase puzle.
@@ -44,8 +46,11 @@ public:
 	// Devuelve la superficie de la imagen grande.
 	SDL_Surface* getGrande() const;
 
-	// Devuelve la superficie de la pieza seleccionada.
-	SDL_Surface* getPieza(int numPieza) const;
+	// Devuelve el tamaño del puzle.
+	int getTamano() const;
+
+	// Establece el tamaño del puzle.
+	void setTamano(int nuevoTamano);
 
 	// Remueve las piezas del puzle.
 	void remover();
@@ -53,13 +58,19 @@ public:
 	// Soluciona el puzle.
 	void solucionar();
 
-	// Matriz del estado puzle.
-	int estado[3][3];
+	// Matriz de piezas.
+	Matriz<Pieza> *matriz;
 
 	// Indica si el puzle está solucionado.
 	bool solucionado() const;
 
+	// Intercambia dos piezas.
+	void intercambiar(int posx1, int posy1, int posx2, int posy2);
+
 private:
+
+	// Tamaño del puzle NxN
+	int tamano;
 
 	// Ruta del puzle.
 	string ruta;
@@ -68,9 +79,7 @@ private:
 	SDL_Surface* grande;
 	SDL_Surface* medio;
 	SDL_Surface* pequeno;
-	SDL_Surface* piezas[9];
 };
 
 
 #endif	/* _PUZLE_H */
-

@@ -5,7 +5,7 @@ OPTIONS= -g -Wall -O2
 DEBUG= #-D DEBUG
 LIBDIR=src
 INCLUDEDIR=include
-_OBJ= Sonido.o Puzle.o Directorio.o Juego.o
+_OBJ= Sonido.o Pieza.o Puzle.o Directorio.o Juego.o
 OBJ = $(patsubst %,$(LIBDIR)/%,$(_OBJ))
 
 all: main

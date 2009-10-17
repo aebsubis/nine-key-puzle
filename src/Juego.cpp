@@ -133,10 +133,10 @@ void Juego::inicializaSDL()
 	// Cargamos los sonidos.
 	sIntercambiar.cargar("data/intercambiar.wav");
 	sSeleccionar.cargar("data/seleccionar.wav");
-	sMenu.cargar("data/menu.wav");
+	sMenu.cargar("data/menu.wav"); // Cambiar.
 	sRemover.cargar("data/remover.wav");
 	sVictoria.cargar("data/victoria.wav");
-	sFondo.cargar("data/fondo.wav");
+	sFondo.cargar("data/fondo.wav"); // Cambiar.
 
 	// Repetición de teclas.
 	SDL_EnableKeyRepeat(100, 100);	
@@ -278,6 +278,43 @@ void Juego::eventosMenu()
 		}
 		else if (event.type == SDL_KEYUP)
 		{
+			if (event.key.keysym.sym == SDLK_KP4)
+			{
+				// Seleccionamos el puzle actual.
+				list<Puzle*>::iterator pos = puzles.begin();
+				int explorandoPosicion = 0;
+				bool encontrado = false;
+				while( pos != puzles.end() && encontrado == false)
+				{
+					if(explorandoPosicion == numPuzleActual)
+					{
+						puzleActual = *pos;
+						encontrado = true;
+					}
+					pos++;
+					explorandoPosicion++;
+				}
+
+				if(encontrado == true)
+				{
+					// Dificultad facil.
+					puzleActual->setTamano(3);
+
+					// Removemos el puzle.
+					puzleActual->remover();
+
+					// Pasamos a jugar.
+					estado = 1;
+
+					// Reproducimos el sonido.
+					sRemover.reproducir();
+				}
+				else
+				{
+					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
+					salir = true;
+				}
+			}
 			if (event.key.keysym.sym == SDLK_KP5)
 			{
 				// Seleccionamos el puzle actual.
@@ -297,6 +334,46 @@ void Juego::eventosMenu()
 
 				if(encontrado == true)
 				{
+					// Dificultad media.
+					puzleActual->setTamano(5);
+
+					// Removemos el puzle.
+					puzleActual->remover();
+
+					// Pasamos a jugar.
+					estado = 1;
+
+					// Reproducimos el sonido.
+					sRemover.reproducir();
+				}
+				else
+				{
+					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
+					salir = true;
+				}
+			}
+			else if (event.key.keysym.sym == SDLK_KP6)
+			{
+				// Seleccionamos el puzle actual.
+				list<Puzle*>::iterator pos = puzles.begin();
+				int explorandoPosicion = 0;
+				bool encontrado = false;
+				while( pos != puzles.end() && encontrado == false)
+				{
+					if(explorandoPosicion == numPuzleActual)
+					{
+						puzleActual = *pos;
+						encontrado = true;
+					}
+					pos++;
+					explorandoPosicion++;
+				}
+
+				if(encontrado == true)
+				{
+					// Dificultad dificil.
+					puzleActual->setTamano(10);
+
 					// Removemos el puzle.
 					puzleActual->remover();
 
@@ -489,7 +566,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 1;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -503,7 +580,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 2;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -517,7 +594,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 3;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -531,7 +608,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 4;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -545,7 +622,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 5;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -559,7 +636,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 6;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -573,7 +650,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 7;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -587,7 +664,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 8;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 			}
@@ -601,7 +678,7 @@ SDL_Event event;
 				else
 				{
 					fichaSeleccionada2 = 9;
-					intercambiar(fichaSeleccionada1, fichaSeleccionada2);
+					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
 				}
 
 				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
@@ -659,41 +736,25 @@ void Juego::renderJuego()
 	SDL_BlitSurface(SURFfondo, NULL, SURFscreen, NULL);
 
 	// Dibujamos el puzle actual.
-	for(int i=0; i<3; i++)
+	for(int i=0; i<puzleActual->getTamano(); i++)
 	{
-		for(int j=0; j<3; j++)
+		for(int j=0; j<puzleActual->getTamano(); j++)
 		{
+
+			// Calculamos la superficie de corte.
+			SDL_Rect corte;
+			corte.w = 500 / puzleActual->getTamano();
+			corte.h = 500 / puzleActual->getTamano();
+			corte.x = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getX();
+			corte.y = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getY();
 
 			// Calculamos la posición de la pieza.
 			SDL_Rect posicion;
-			posicion.x = 200 + 200*j;
-			posicion.y = 200*i;
+			posicion.x = 250 + corte.w*i;
+			posicion.y = 50 + corte.h*j ;
 
 			// Dibujamos la pieza.
-			SDL_BlitSurface(puzleActual->getPieza(puzleActual->estado[i][j]), NULL, SURFscreen, &posicion);
-
-		}
-	}
-
-	// Dibujamos la superficie translúcida si la ficha1 ha sido seleccionada.
-	if(fichaSeleccionada1 != 0)
-	{
-		int contador = 1;
-		bool dibujado = false;
-		for(int i=2; i>=0 && dibujado == false; i--)
-		{
-			for(int j=0; j<3 && dibujado == false; j++)
-			{
-				if(contador == fichaSeleccionada1)
-				{
-					SDL_Rect posicion;
-					posicion.x = 200 + 200*j;
-					posicion.y = 200*i;
-					SDL_BlitSurface(SURFtranslucida, NULL, SURFscreen, &posicion);
-					dibujado = true;
-				}
-				contador++;
-			}
+			SDL_BlitSurface(puzleActual->getGrande(), &corte, SURFscreen, &posicion);
 		}
 	}
 
@@ -703,7 +764,7 @@ void Juego::renderJuego()
 	// Comprobamos si el puzle está solucionado.
 	if(puzleActual->solucionado() == true)
 	{
-		// Mostramos el texto "Puzle resuelto".
+		// Mostramos el texto "Completado".
 
 		SDL_Rect rectangulo;
 		rectangulo.h = SURFcompletado->h;
@@ -736,47 +797,6 @@ void Juego::cargarPuzles()
 		}
 		pos++;
 	}
-}
-
-// Intercambia dos fichas.
-void Juego::intercambiar(int posicionInicio, int posicionDestino)
-{
-	int contador = 1;
-	int piezaInicio = 0;
-	int piezaDestino = 0;
-	for(int i=2; i>=0; i--)
-	{
-		for(int j=0; j<3; j++)
-		{
-			if(contador == posicionInicio)
-				piezaInicio = puzleActual->estado[i][j];
-
-			if(contador == posicionDestino)
-				piezaDestino = puzleActual->estado[i][j];
-			contador++;
-		}
-	}
-
-	contador = 1;
-	for(int i=2; i>=0; i--)
-	{
-		for(int j=0; j<3; j++)
-		{
-			if(contador == posicionInicio)
-				puzleActual->estado[i][j] = piezaDestino;
-
-			if(contador == posicionDestino)
-				puzleActual->estado[i][j] = piezaInicio;
-			contador++;
-		}
-	}
-
-	// Reproducimos el sonido de intercambiar fichas.
-	sIntercambiar.reproducir();
-
-	// Reiniciamos las fichas seleccionadas.
-	fichaSeleccionada1 = 0;
-	fichaSeleccionada2 = 0;
 }
 
 void Juego::dibujarProgresoSalir()
