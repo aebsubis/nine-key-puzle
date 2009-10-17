@@ -67,6 +67,13 @@ public:
 	// Intercambia dos piezas.
 	void intercambiar(int posx1, int posy1, int posx2, int posy2);
 
+	// Mueve el hueco en la dirección indicada.
+	void mover(string direccion);
+
+	// Indica la coordenada del hueco;
+	int huecoX;
+	int huecoY;
+	
 private:
 
 	// Tamaño del puzle NxN

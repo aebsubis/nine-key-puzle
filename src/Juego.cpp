@@ -559,128 +559,58 @@ SDL_Event event;
 			if (event.key.keysym.sym == SDLK_KP1)
 			{
 				// Soltada tecla 1.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 1;
-				}
-				else
-				{
-					fichaSeleccionada2 = 1;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
 
 			}
 			else if (event.key.keysym.sym == SDLK_KP2)
 			{
 				// Soltada tecla 2.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 2;
-				}
-				else
-				{
-					fichaSeleccionada2 = 2;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
+				puzleActual->mover("abajo");
 
+				// Reproducimos el sonido.
+				sIntercambiar.reproducir();
 			}
 			else if (event.key.keysym.sym == SDLK_KP3)
 			{
 				// Soltada tecla 3.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 3;
-				}
-				else
-				{
-					fichaSeleccionada2 = 3;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
 
 			}
 			else if (event.key.keysym.sym == SDLK_KP4)
 			{
 				// Soltada tecla 4.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 4;
-				}
-				else
-				{
-					fichaSeleccionada2 = 4;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
+				puzleActual->mover("izquierda");
 
+				// Reproducimos el sonido.
+				sIntercambiar.reproducir();
 			}
 			else if (event.key.keysym.sym == SDLK_KP5)
 			{
 				// Soltada tecla 5.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 5;
-				}
-				else
-				{
-					fichaSeleccionada2 = 5;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
 
 			}
 			else if (event.key.keysym.sym == SDLK_KP6)
 			{
 				// Soltada tecla 6.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 6;
-				}
-				else
-				{
-					fichaSeleccionada2 = 6;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
+				puzleActual->mover("derecha");
 
+				// Reproducimos el sonido.
+				sIntercambiar.reproducir();
 			}
 			else if (event.key.keysym.sym == SDLK_KP7)
 			{
 				// Soltada tecla 7.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 7;
-				}
-				else
-				{
-					fichaSeleccionada2 = 7;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
 
 			}
 			else if (event.key.keysym.sym == SDLK_KP8)
 			{
 				// Soltada tecla 8.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 8;
-				}
-				else
-				{
-					fichaSeleccionada2 = 8;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
+				puzleActual->mover("arriba");
 
+				// Reproducimos el sonido.
+				sIntercambiar.reproducir();
 			}
 			if (event.key.keysym.sym == SDLK_KP9)
 			{
 				// Soltada tecla 9.
-				if(fichaSeleccionada1 == 0)
-				{
-					fichaSeleccionada1 = 9;
-				}
-				else
-				{
-					fichaSeleccionada2 = 9;
-					//intercambiar(fichaSeleccionada1, fichaSeleccionada2);
-				}
-
 				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
 				temporizadorEscape = 0;
 			}
@@ -741,20 +671,23 @@ void Juego::renderJuego()
 		for(int j=0; j<puzleActual->getTamano(); j++)
 		{
 
-			// Calculamos la superficie de corte.
-			SDL_Rect corte;
-			corte.w = 500 / puzleActual->getTamano();
-			corte.h = 500 / puzleActual->getTamano();
-			corte.x = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getX();
-			corte.y = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getY();
+			if( (i != puzleActual->huecoX ) || ( j != puzleActual->huecoY) )
+			{
+				// Calculamos la superficie de corte.
+				SDL_Rect corte;
+				corte.w = 500 / puzleActual->getTamano();
+				corte.h = 500 / puzleActual->getTamano();
+				corte.x = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getX();
+				corte.y = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getY();
 
-			// Calculamos la posición de la pieza.
-			SDL_Rect posicion;
-			posicion.x = 250 + corte.w*i;
-			posicion.y = 50 + corte.h*j ;
+				// Calculamos la posición de la pieza.
+				SDL_Rect posicion;
+				posicion.x = 250 + corte.w*i;
+				posicion.y = 50 + corte.h*j ;
 
-			// Dibujamos la pieza.
-			SDL_BlitSurface(puzleActual->getGrande(), &corte, SURFscreen, &posicion);
+				// Dibujamos la pieza.
+				SDL_BlitSurface(puzleActual->getGrande(), &corte, SURFscreen, &posicion);
+			}
 		}
 	}
 

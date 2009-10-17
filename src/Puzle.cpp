@@ -12,6 +12,9 @@ Puzle::Puzle()
 	matriz = NULL;
 
 	tamano = 0;
+
+	huecoX = 0;
+	huecoY = 0;
 }
 
 // Constructor sobrecargado.
@@ -47,7 +50,11 @@ Puzle::Puzle(string ruta)
 	};
 
 	matriz = NULL;
+
 	tamano = 0;
+
+	huecoX = 0;
+	huecoY = 0;
 }
 
 // Constructor de copia.
@@ -161,6 +168,10 @@ void Puzle::setTamano(int nuevoTamano)
 
 	// Establecemos el estado solucionado.
 	solucionar();
+
+	// Indicamos la posición del hueco.
+	huecoX = tamano-1;
+	huecoY = tamano-1;
 }
 
 // Remueve las fichas.
@@ -209,10 +220,61 @@ bool Puzle::solucionado() const
 	return solucionado;
 }
 
+// Intercambia dos piezas.
 void Puzle::intercambiar(int posx1, int posy1, int posx2, int posy2)
 {
 	Pieza pieza1 = matriz->getElemento(posx1, posy1);
 	Pieza pieza2 = matriz->getElemento(posx2, posy2);
 	matriz->setElemento(posx1, posy1, pieza2);
 	matriz->setElemento(posx2, posy2, pieza1);
+
+	// Comprobamos si hemos movido el hueco.
+	if(posx1 == huecoX && posy1 == huecoY)
+	{
+		// Cambiamos el hueco.
+		huecoX = posx2;
+		huecoY = posy2;
+	}
+	else if(posx2 == huecoX && posy2 == huecoY)
+	{
+		huecoX = posx1;
+		huecoY = posy1;
+	}
+}
+
+// Mueve el hueco en la dirección indicada.
+void Puzle::mover(string direccion)
+{
+	if(direccion == "arriba")
+	{
+		if(huecoY>0)
+		{
+			intercambiar(huecoX, huecoY, huecoX, huecoY-1);
+		}
+	}
+	else if(direccion == "abajo")
+	{
+		if(huecoY<tamano-1)
+		{
+			intercambiar(huecoX, huecoY, huecoX, huecoY+1);
+		}
+	}
+	else if(direccion == "derecha")
+	{
+		if(huecoX<tamano-1)
+		{
+			intercambiar(huecoX, huecoY, huecoX+1, huecoY);
+		}
+	}
+	else if(direccion == "izquierda")
+	{
+		if(huecoX>0)
+		{
+			intercambiar(huecoX, huecoY, huecoX-1, huecoY);
+		}
+	}
+	else
+	{
+		cout << "<Error>Puzle:mover - Dirección no permitida.";
+	}
 }
