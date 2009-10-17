@@ -83,6 +83,9 @@ private:
 	// Imagen de fondo.
 	SDL_Surface *SURFfondo;
 
+	// Imagen de fondo2.
+	SDL_Surface *SURFfondo2;
+
 	// Superficie de juego.
 	SDL_Surface *SURFjuego;
 
@@ -92,8 +95,8 @@ private:
 	// Texto completado.
 	SDL_Surface *SURFcompletado;
 
-	// Superficie translucida.
-	SDL_Surface *SURFtranslucida;
+	// Animación del reloj.
+	SDL_Surface *SURFreloj;
 	
 	// Sonidos
 	Sonido sIntercambiar;
@@ -106,6 +109,10 @@ private:
 	// Contadores.
 	Uint32 temporizadorEscape;
 	Uint32 iteracionAnterior;
+	Uint32 temporizadorReloj;
+
+	// Frame de la animación del reloj.
+	int frameAnimacionReloj;
 
 	// Tiempo de escape.
 	int tiempoEscape;

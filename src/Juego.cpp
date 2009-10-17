@@ -1,5 +1,6 @@
 #include <sstream>
 #include <SDL/SDL_video.h>
+#include <SDL/SDL_keysym.h>
 #include "Juego.h"
 
 // Constructor por defecto.
@@ -20,13 +21,18 @@ Juego::Juego()
 	// Variables de SDL.
 	SURFscreen = NULL;
 	SURFfondo = NULL;
+	SURFfondo2 = NULL;
 	SURFsaliendo = NULL;
 	SURFcompletado = NULL;
-	SURFtranslucida = NULL;
+	SURFreloj = NULL;
 
 	// Iniciamos el temporizador.
 	temporizadorEscape = 0;
 	iteracionAnterior = 0;
+	temporizadorReloj = 0;
+
+	// Frame inicial.
+	frameAnimacionReloj = 0;
 	
 	// Tiempo de escape.
 	tiempoEscape = 3000;
@@ -85,9 +91,25 @@ void Juego::inicializaSDL()
 		exit(1);
 	}
 
-	// Creamos la superficie translúcida.
-	SURFtranslucida = IMG_Load("data/translucida.png");
-	if (SURFtranslucida == NULL)
+	// Cargamos la imagen de fondo2.
+	SURFfondo2 = IMG_Load("data/fondo2.jpg");
+	if (SURFfondo2 == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// Cargamos la imagen de completado.
+	SURFcompletado = IMG_Load("data/completado.png");
+	if (SURFcompletado == NULL)
+	{
+		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// Cargamos la imagen del reloj.
+	SURFreloj = IMG_Load("data/reloj.jpg");
+	if (SURFreloj == NULL)
 	{
 		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
@@ -116,7 +138,7 @@ void Juego::inicializaSDL()
 	color.b = 0;
 	SURFsaliendo = TTF_RenderText_Blended(FONTfuente, "Saliendo...", color);
 
-	// Texto completado.
+	/*// Texto completado.
 	FONTfuente = TTF_OpenFont("data/dejavu.ttf",80);
 	if (FONTfuente == NULL)
 	{
@@ -128,7 +150,7 @@ void Juego::inicializaSDL()
 	color.g = 155;
 	color.b = 0;
 	SURFcompletado = TTF_RenderText_Blended(FONTfuente, "COMPLETADO", color);
-
+*/
 
 	// Cargamos los sonidos.
 	sIntercambiar.cargar("data/intercambiar.wav");
@@ -139,7 +161,11 @@ void Juego::inicializaSDL()
 	sFondo.cargar("data/fondo.wav"); // Cambiar.
 
 	// Repetición de teclas.
-	SDL_EnableKeyRepeat(100, 100);	
+	SDL_EnableKeyRepeat(100, 100);
+
+	// Inicializamos los temporizadores.
+	iteracionAnterior = SDL_GetTicks();
+	temporizadorReloj = SDL_GetTicks();
 }
 
 // Inicia el juego.
@@ -213,7 +239,7 @@ void Juego::eventosMenu()
 				// Pulsada tecla 1.
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP2)
+			else if (event.key.keysym.sym == SDLK_KP2 || event.key.keysym.sym == SDLK_DOWN)
 			{
 				// Elegimos el puzle de abajo.
 				if(numPuzleActual == 0)
@@ -252,7 +278,7 @@ void Juego::eventosMenu()
 				// Pulsada tecla 7.
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP8)
+			else if (event.key.keysym.sym == SDLK_KP8 || event.key.keysym.sym == SDLK_UP)
 			{
 				// Elegimos el puzle de arriba.
 				if((unsigned)numPuzleActual == puzles.size()-1)
@@ -267,7 +293,7 @@ void Juego::eventosMenu()
 				sMenu.reproducir();
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP9)
+			else if (event.key.keysym.sym == SDLK_KP9 || event.key.keysym.sym == SDLK_ESCAPE)
 			{
 				// Pulsada tecla 9.
 
@@ -278,7 +304,7 @@ void Juego::eventosMenu()
 		}
 		else if (event.type == SDL_KEYUP)
 		{
-			if (event.key.keysym.sym == SDLK_KP4)
+			if (event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_RIGHT)
 			{
 				// Seleccionamos el puzle actual.
 				list<Puzle*>::iterator pos = puzles.begin();
@@ -335,7 +361,7 @@ void Juego::eventosMenu()
 				if(encontrado == true)
 				{
 					// Dificultad media.
-					puzleActual->setTamano(5);
+					puzleActual->setTamano(4);
 
 					// Removemos el puzle.
 					puzleActual->remover();
@@ -372,7 +398,7 @@ void Juego::eventosMenu()
 				if(encontrado == true)
 				{
 					// Dificultad dificil.
-					puzleActual->setTamano(10);
+					puzleActual->setTamano(5);
 
 					// Removemos el puzle.
 					puzleActual->remover();
@@ -389,7 +415,7 @@ void Juego::eventosMenu()
 					salir = true;
 				}
 			}
-			else if (event.key.keysym.sym == SDLK_KP9)
+			else if (event.key.keysym.sym == SDLK_KP9 || event.key.keysym.sym == SDLK_ESCAPE)
 			{
 				// Soltada tecla 9.
 
@@ -545,7 +571,7 @@ SDL_Event event;
 	{
 		if (event.type == SDL_KEYDOWN)
 		{
-			if (event.key.keysym.sym == SDLK_KP9)
+			if (event.key.keysym.sym == SDLK_KP9 || event.key.keysym.sym == SDLK_ESCAPE)
 			{
 				// Pulsada tecla 9.
 
@@ -561,7 +587,7 @@ SDL_Event event;
 				// Soltada tecla 1.
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP2)
+			else if (event.key.keysym.sym == SDLK_KP2 || event.key.keysym.sym == SDLK_DOWN)
 			{
 				// Soltada tecla 2.
 				puzleActual->mover("abajo");
@@ -574,7 +600,7 @@ SDL_Event event;
 				// Soltada tecla 3.
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP4)
+			else if (event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_LEFT)
 			{
 				// Soltada tecla 4.
 				puzleActual->mover("izquierda");
@@ -587,7 +613,7 @@ SDL_Event event;
 				// Soltada tecla 5.
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP6)
+			else if (event.key.keysym.sym == SDLK_KP6 || event.key.keysym.sym == SDLK_RIGHT)
 			{
 				// Soltada tecla 6.
 				puzleActual->mover("derecha");
@@ -600,7 +626,7 @@ SDL_Event event;
 				// Soltada tecla 7.
 
 			}
-			else if (event.key.keysym.sym == SDLK_KP8)
+			else if (event.key.keysym.sym == SDLK_KP8 || event.key.keysym.sym == SDLK_UP)
 			{
 				// Soltada tecla 8.
 				puzleActual->mover("arriba");
@@ -608,7 +634,7 @@ SDL_Event event;
 				// Reproducimos el sonido.
 				sIntercambiar.reproducir();
 			}
-			if (event.key.keysym.sym == SDLK_KP9)
+			if (event.key.keysym.sym == SDLK_KP9 || event.key.keysym.sym == SDLK_ESCAPE)
 			{
 				// Soltada tecla 9.
 				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
@@ -636,6 +662,20 @@ void Juego::actualizarJuego()
 		}
 	}
 
+	// Actualizamos el frame del reloj.
+	if(SDL_GetTicks() - temporizadorReloj > 400)
+	{
+		// Actualizamos el temporizador.
+		temporizadorReloj = SDL_GetTicks();
+
+		// Incrementamos el frame.
+		frameAnimacionReloj++;
+
+		// Comprobamos si se ha pasado.
+		if(frameAnimacionReloj>3)
+			frameAnimacionReloj = 0;
+	}
+	
 	// Comprobamos si el puzle está solucionado.
 	if(puzleActual->solucionado() == true)
 	{
@@ -659,29 +699,45 @@ void Juego::actualizarJuego()
 // Hace un render del juego.
 void Juego::renderJuego()
 {
+	// Rectángulo de posición.
+	SDL_Rect posicion;
+
+	// Rectángulo de corte.
+	SDL_Rect corte;
+	
 	// Limpiar pantalla
 	SDL_FillRect(SURFscreen, 0, SDL_MapRGB(SURFscreen->format, 0, 0, 0));
 
 	// Fondo.
-	SDL_BlitSurface(SURFfondo, NULL, SURFscreen, NULL);
+	SDL_BlitSurface(SURFfondo2, NULL, SURFscreen, NULL);
+
+	// Comprobamos si está solucionado.
+	bool solucionado = puzleActual->solucionado();
+
+	// Dibujamos el reloj.
+	corte.w = 50;
+	corte.h = 50;
+	corte.x = 50*frameAnimacionReloj;
+	corte.y = 0;
+	posicion.x = 18;
+	posicion.y = 45;
+	SDL_BlitSurface(SURFreloj, &corte, SURFscreen, &posicion);
+
 
 	// Dibujamos el puzle actual.
 	for(int i=0; i<puzleActual->getTamano(); i++)
 	{
 		for(int j=0; j<puzleActual->getTamano(); j++)
 		{
-
-			if( (i != puzleActual->huecoX ) || ( j != puzleActual->huecoY) )
+			if( (solucionado == true) || ( (i != puzleActual->huecoX ) || ( j != puzleActual->huecoY) ) )
 			{
 				// Calculamos la superficie de corte.
-				SDL_Rect corte;
 				corte.w = 500 / puzleActual->getTamano();
 				corte.h = 500 / puzleActual->getTamano();
 				corte.x = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getX();
 				corte.y = (500 / puzleActual->getTamano())*puzleActual->matriz->getElemento(i,j).getY();
 
 				// Calculamos la posición de la pieza.
-				SDL_Rect posicion;
 				posicion.x = 250 + corte.w*i;
 				posicion.y = 50 + corte.h*j ;
 
@@ -691,19 +747,25 @@ void Juego::renderJuego()
 		}
 	}
 
+	// Dibujamos la miniatura del puzle en juego.
+	posicion.x = 18;
+	posicion.y = 350;
+
+	// Dibujamos la miniatura.
+	SDL_BlitSurface(puzleActual->getMedio(), NULL, SURFscreen, &posicion);
+
+
 	// Dibujamos el progreso de salir.
 	dibujarProgresoSalir();
 
-	// Comprobamos si el puzle está solucionado.
-	if(puzleActual->solucionado() == true)
+	// Visualizamos que el puzle está solucionado.
+	if(solucionado)
 	{
 		// Mostramos el texto "Completado".
 
 		SDL_Rect rectangulo;
-		rectangulo.h = SURFcompletado->h;
-		rectangulo.w = SURFcompletado->w;
-		rectangulo.x = 210;
-		rectangulo.y = 250;
+		rectangulo.x = 300;
+		rectangulo.y = 280;
 		SDL_BlitSurface(SURFcompletado, NULL, SURFscreen, &rectangulo);
 	}
 	

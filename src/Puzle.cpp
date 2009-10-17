@@ -177,15 +177,37 @@ void Puzle::setTamano(int nuevoTamano)
 // Remueve las fichas.
 void Puzle::remover()
 {
+	string direccion = "";
 	int numIntercambios = tamano*50;
 	for(int i=0; i<numIntercambios; i++ )
 	{
+		int dirAleatoria = rand()%4;
+		switch(dirAleatoria)
+		{
+			case 0:
+				direccion = "derecha";
+				break;
+			case 1:
+				direccion = "izquierda";
+				break;
+			case 2:
+				direccion = "arriba";
+				break;
+			case 3:
+				direccion = "abajo";
+				break;
+		}
+		
+		mover(direccion);
+
+		/*
 		int posx1 = rand()%tamano;
 		int posy1 = rand()%tamano;
 		int posx2 = rand()%tamano;
 		int posy2 = rand()%tamano;
 
 		intercambiar(posx1, posy1, posx2, posy2);
+		*/
 	}
 }
 
@@ -212,7 +234,7 @@ bool Puzle::solucionado() const
 	{
 		for(int j=0; j<tamano && solucionado == true; j++)
 		{
-			if( (matriz[i][j]->getX() != i) || (matriz[i][j]->getY() !=j) )
+			if( (matriz->getElemento(i,j).getX() != i) || (matriz->getElemento(i,j).getY() !=j) )
 				solucionado = false;
 		}
 	}
@@ -247,30 +269,30 @@ void Puzle::mover(string direccion)
 {
 	if(direccion == "arriba")
 	{
-		if(huecoY>0)
-		{
-			intercambiar(huecoX, huecoY, huecoX, huecoY-1);
-		}
-	}
-	else if(direccion == "abajo")
-	{
 		if(huecoY<tamano-1)
 		{
 			intercambiar(huecoX, huecoY, huecoX, huecoY+1);
 		}
 	}
-	else if(direccion == "derecha")
+	else if(direccion == "abajo")
 	{
-		if(huecoX<tamano-1)
+		if(huecoY>0)
 		{
-			intercambiar(huecoX, huecoY, huecoX+1, huecoY);
+			intercambiar(huecoX, huecoY, huecoX, huecoY-1);
 		}
 	}
-	else if(direccion == "izquierda")
+	else if(direccion == "derecha")
 	{
 		if(huecoX>0)
 		{
 			intercambiar(huecoX, huecoY, huecoX-1, huecoY);
+		}
+	}
+	else if(direccion == "izquierda")
+	{
+		if(huecoX<tamano-1)
+		{
+			intercambiar(huecoX, huecoY, huecoX+1, huecoY);
 		}
 	}
 	else
