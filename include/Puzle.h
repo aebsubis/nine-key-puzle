@@ -68,7 +68,7 @@ public:
 	void intercambiar(int posx1, int posy1, int posx2, int posy2);
 
 	// Mueve el hueco en la dirección indicada.
-	void mover(string direccion);
+	bool mover(string direccion);
 
 	// Indica la coordenada del hueco;
 	int huecoX;

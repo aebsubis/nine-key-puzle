@@ -97,6 +97,15 @@ private:
 
 	// Animación del reloj.
 	SDL_Surface *SURFreloj;
+
+	// Superficie de tiempo.
+	SDL_Surface *SURFtiempo;
+
+	// Superficie de movimientos.
+	SDL_Surface *SURFmovimientos;
+
+	// Fuente utilizada.
+	TTF_Font* FONTfuente;
 	
 	// Sonidos
 	Sonido sIntercambiar;
@@ -110,6 +119,10 @@ private:
 	Uint32 temporizadorEscape;
 	Uint32 iteracionAnterior;
 	Uint32 temporizadorReloj;
+	Uint32 temporizadorJuego;
+
+	// Contabiliza los movimientos realizados.
+	int contadorMovimientos;
 
 	// Frame de la animación del reloj.
 	int frameAnimacionReloj;

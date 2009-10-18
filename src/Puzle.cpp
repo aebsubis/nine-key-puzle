@@ -265,13 +265,14 @@ void Puzle::intercambiar(int posx1, int posy1, int posx2, int posy2)
 }
 
 // Mueve el hueco en la dirección indicada.
-void Puzle::mover(string direccion)
+bool Puzle::mover(string direccion)
 {
 	if(direccion == "arriba")
 	{
 		if(huecoY<tamano-1)
 		{
 			intercambiar(huecoX, huecoY, huecoX, huecoY+1);
+			return true;
 		}
 	}
 	else if(direccion == "abajo")
@@ -279,6 +280,7 @@ void Puzle::mover(string direccion)
 		if(huecoY>0)
 		{
 			intercambiar(huecoX, huecoY, huecoX, huecoY-1);
+			return true;
 		}
 	}
 	else if(direccion == "derecha")
@@ -286,6 +288,7 @@ void Puzle::mover(string direccion)
 		if(huecoX>0)
 		{
 			intercambiar(huecoX, huecoY, huecoX-1, huecoY);
+			return true;
 		}
 	}
 	else if(direccion == "izquierda")
@@ -293,10 +296,12 @@ void Puzle::mover(string direccion)
 		if(huecoX<tamano-1)
 		{
 			intercambiar(huecoX, huecoY, huecoX+1, huecoY);
+			return true;
 		}
 	}
 	else
 	{
 		cout << "<Error>Puzle:mover - Dirección no permitida.";
 	}
+	return false;
 }

@@ -25,11 +25,18 @@ Juego::Juego()
 	SURFsaliendo = NULL;
 	SURFcompletado = NULL;
 	SURFreloj = NULL;
+	SURFtiempo = NULL;
+	SURFmovimientos = NULL;
+	FONTfuente = NULL;
 
 	// Iniciamos el temporizador.
 	temporizadorEscape = 0;
 	iteracionAnterior = 0;
 	temporizadorReloj = 0;
+	temporizadorJuego = 0;
+
+	// Movimientos realizados.
+	contadorMovimientos = 0;
 
 	// Frame inicial.
 	frameAnimacionReloj = 0;
@@ -121,9 +128,6 @@ void Juego::inicializaSDL()
 		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
-	
-	TTF_Font* FONTfuente = NULL;
-	SDL_Color color;
 
 	// Texto saliendo.
 	FONTfuente = TTF_OpenFont("data/dejavu.ttf",12);
@@ -133,24 +137,11 @@ void Juego::inicializaSDL()
 		exit(1);
 	}
 
+	SDL_Color color;
 	color.r = 0;
 	color.g = 0;
 	color.b = 0;
 	SURFsaliendo = TTF_RenderText_Blended(FONTfuente, "Saliendo...", color);
-
-	/*// Texto completado.
-	FONTfuente = TTF_OpenFont("data/dejavu.ttf",80);
-	if (FONTfuente == NULL)
-	{
-		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
-		exit(1);
-	}
-
-	color.r = 0;
-	color.g = 155;
-	color.b = 0;
-	SURFcompletado = TTF_RenderText_Blended(FONTfuente, "COMPLETADO", color);
-*/
 
 	// Cargamos los sonidos.
 	sIntercambiar.cargar("data/intercambiar.wav");
@@ -158,7 +149,7 @@ void Juego::inicializaSDL()
 	sMenu.cargar("data/menu.wav"); // Cambiar.
 	sRemover.cargar("data/remover.wav");
 	sVictoria.cargar("data/victoria.wav");
-	sFondo.cargar("data/fondo.wav"); // Cambiar.
+	sFondo.cargar("data/fondo.wav");
 
 	// Repetición de teclas.
 	SDL_EnableKeyRepeat(100, 100);
@@ -334,6 +325,12 @@ void Juego::eventosMenu()
 
 					// Reproducimos el sonido.
 					sRemover.reproducir();
+
+					// Iniciamos el contador de tiempo.
+					temporizadorJuego = SDL_GetTicks();
+
+					// Reiniciamos los movimientos.
+					contadorMovimientos = 0;
 				}
 				else
 				{
@@ -371,6 +368,12 @@ void Juego::eventosMenu()
 
 					// Reproducimos el sonido.
 					sRemover.reproducir();
+
+					// Iniciamos el contador de tiempo.
+					temporizadorJuego = SDL_GetTicks();
+
+					// Reiniciamos los movimientos.
+					contadorMovimientos = 0;
 				}
 				else
 				{
@@ -408,6 +411,12 @@ void Juego::eventosMenu()
 
 					// Reproducimos el sonido.
 					sRemover.reproducir();
+
+					// Iniciamos el contador de tiempo.
+					temporizadorJuego = SDL_GetTicks();
+
+					// Reiniciamos los movimientos.
+					contadorMovimientos = 0;
 				}
 				else
 				{
@@ -590,10 +599,14 @@ SDL_Event event;
 			else if (event.key.keysym.sym == SDLK_KP2 || event.key.keysym.sym == SDLK_DOWN)
 			{
 				// Soltada tecla 2.
-				puzleActual->mover("abajo");
+				if(puzleActual->mover("abajo"))
+				{
+					// Reproducimos el sonido.
+					sIntercambiar.reproducir();
 
-				// Reproducimos el sonido.
-				sIntercambiar.reproducir();
+					// Incrementamos los movimientos.
+					contadorMovimientos++;
+				}
 			}
 			else if (event.key.keysym.sym == SDLK_KP3)
 			{
@@ -603,10 +616,14 @@ SDL_Event event;
 			else if (event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_LEFT)
 			{
 				// Soltada tecla 4.
-				puzleActual->mover("izquierda");
+				if(puzleActual->mover("izquierda"))
+				{
+					// Reproducimos el sonido.
+					sIntercambiar.reproducir();
 
-				// Reproducimos el sonido.
-				sIntercambiar.reproducir();
+					// Incrementamos los movimientos.
+					contadorMovimientos++;
+				}
 			}
 			else if (event.key.keysym.sym == SDLK_KP5)
 			{
@@ -616,10 +633,14 @@ SDL_Event event;
 			else if (event.key.keysym.sym == SDLK_KP6 || event.key.keysym.sym == SDLK_RIGHT)
 			{
 				// Soltada tecla 6.
-				puzleActual->mover("derecha");
+				if(puzleActual->mover("derecha"))
+				{
+					// Reproducimos el sonido.
+					sIntercambiar.reproducir();
 
-				// Reproducimos el sonido.
-				sIntercambiar.reproducir();
+					// Incrementamos los movimientos.
+					contadorMovimientos++;
+				}
 			}
 			else if (event.key.keysym.sym == SDLK_KP7)
 			{
@@ -629,10 +650,14 @@ SDL_Event event;
 			else if (event.key.keysym.sym == SDLK_KP8 || event.key.keysym.sym == SDLK_UP)
 			{
 				// Soltada tecla 8.
-				puzleActual->mover("arriba");
+				if(puzleActual->mover("arriba"))
+				{
+					// Reproducimos el sonido.
+					sIntercambiar.reproducir();
 
-				// Reproducimos el sonido.
-				sIntercambiar.reproducir();
+					// Incrementamos los movimientos.
+					contadorMovimientos++;
+				}
 			}
 			if (event.key.keysym.sym == SDLK_KP9 || event.key.keysym.sym == SDLK_ESCAPE)
 			{
@@ -723,6 +748,29 @@ void Juego::renderJuego()
 	posicion.y = 45;
 	SDL_BlitSurface(SURFreloj, &corte, SURFscreen, &posicion);
 
+	// Dibujamos las estadísticas.
+	char msg[100] = "0";
+	SDL_Color color;
+	color.r = 255;
+	color.g = 255;
+	color.b = 255;
+
+	Uint32 tiempoTranscurrido = (SDL_GetTicks() - temporizadorJuego)/1000;
+	int horas = tiempoTranscurrido/3600;
+	int minutos = (tiempoTranscurrido/60)%60;
+	int segundos = tiempoTranscurrido%60;
+
+	posicion.x = 80;
+	posicion.y = 65;
+	sprintf(msg, "%d:%d:%d", horas, minutos, segundos);
+	SURFtiempo = TTF_RenderText_Blended(FONTfuente, msg, color);
+	SDL_BlitSurface(SURFtiempo, NULL, SURFscreen, &posicion);
+
+	posicion.x = 18;
+	posicion.y = 95;
+	sprintf(msg,"Movimientos: %d",contadorMovimientos);
+	SURFmovimientos = TTF_RenderText_Blended(FONTfuente, msg, color);
+	SDL_BlitSurface(SURFmovimientos, NULL, SURFscreen, &posicion);
 
 	// Dibujamos el puzle actual.
 	for(int i=0; i<puzleActual->getTamano(); i++)
@@ -762,7 +810,6 @@ void Juego::renderJuego()
 	if(solucionado)
 	{
 		// Mostramos el texto "Completado".
-
 		SDL_Rect rectangulo;
 		rectangulo.x = 300;
 		rectangulo.y = 280;
