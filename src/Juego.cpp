@@ -749,21 +749,66 @@ void Juego::renderJuego()
 	SDL_BlitSurface(SURFreloj, &corte, SURFscreen, &posicion);
 
 	// Dibujamos las estadísticas.
-	char msg[100] = "0";
+	char msg[30] = "0";
+	char cDias[4] = "0";
+	char cHoras[3] = "0";
+	char cMinutos[3] = "0";
+	char cSegundos[3] = "0";
+
 	SDL_Color color;
 	color.r = 255;
 	color.g = 255;
 	color.b = 255;
 
 	Uint32 tiempoTranscurrido = (SDL_GetTicks() - temporizadorJuego)/1000;
-	int horas = tiempoTranscurrido/3600;
+
+	int dias = (tiempoTranscurrido/86400)%365;
+	int horas = (tiempoTranscurrido/3600)%24;
 	int minutos = (tiempoTranscurrido/60)%60;
 	int segundos = tiempoTranscurrido%60;
 
-	posicion.x = 80;
-	posicion.y = 65;
-	sprintf(msg, "%d:%d:%d", horas, minutos, segundos);
+	if(segundos < 10)
+		sprintf(cSegundos, "0%d", segundos);
+	else
+		sprintf(cSegundos, "%d", segundos);
+
+	if(minutos < 10)
+		sprintf(cMinutos, "0%d", minutos);
+	else
+		sprintf(cMinutos, "%d", minutos);
+
+	if(horas < 10)
+		sprintf(cHoras, "0%d", horas);
+	else
+		sprintf(cHoras, "%d", horas);
+
+	if(dias < 10)
+		sprintf(cDias, "0%d", dias);
+	else
+		sprintf(cDias, "%d", dias);
+
+	
+	if(horas > 0)
+	{
+		if(dias > 0)
+		{
+			sprintf(msg, "%s:%s:%s:%s",cDias, cHoras, cMinutos, cSegundos);
+		}
+		else
+		{
+			sprintf(msg, "%s:%s:%s", cHoras, cMinutos, cSegundos);
+
+		}
+	}
+	else
+	{
+		sprintf(msg, "%s:%s", cMinutos, cSegundos);
+	}
+	
+
 	SURFtiempo = TTF_RenderText_Blended(FONTfuente, msg, color);
+	posicion.x = 80;
+	posicion.y = 65;		
 	SDL_BlitSurface(SURFtiempo, NULL, SURFscreen, &posicion);
 
 	posicion.x = 18;
