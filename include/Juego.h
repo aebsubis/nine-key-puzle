@@ -68,6 +68,24 @@ private:
 	// Número de puzle que se va a jugar o se está jugando.
 	int numPuzleActual;
 
+	// Devuelve el mejor tiempo del puzle.
+	Uint32 getMejorTiempo(string rutaPuzle);
+
+	// Devuelve los mejores movimientos del puzle.
+	int getMejorMovimiento(string rutaPuzle);
+
+	// Establece el valor del mejor tiempo.
+	void setMejorTiempo(string ruta, Uint32 mejorTiempo);
+
+	// Establece el valor del mejor movimiento.
+	void setMejorMovimiento(string ruta, int mejorMovimiento);
+
+	// Carga el puzle actual con el tamaño indicado.
+	void cargarPuzle(int tamano);
+
+	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
+	char* formatoTiempo(Uint32 tiempo);
+
 	// Indica si se debe salir.
 	bool salir;
 
@@ -99,10 +117,7 @@ private:
 	SDL_Surface *SURFreloj;
 
 	// Superficie de tiempo.
-	SDL_Surface *SURFtiempo;
-
-	// Superficie de movimientos.
-	SDL_Surface *SURFmovimientos;
+	SDL_Surface *SURFtexto;
 
 	// Fuente utilizada.
 	TTF_Font* FONTfuente;
@@ -123,6 +138,12 @@ private:
 
 	// Contabiliza los movimientos realizados.
 	int contadorMovimientos;
+
+	// Mejor número de movimientos del puzle.
+	int mejorMovimiento;
+
+	// Mejor tiempo del puzle.
+	Uint32 mejorTiempo;
 
 	// Frame de la animación del reloj.
 	int frameAnimacionReloj;

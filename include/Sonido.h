@@ -84,7 +84,7 @@ class Sonido
 		static const int audioChannels = 2;
 
 		/// Tamaño del buffer de audio en memoria.
-		static const int audioBuffers = 4096;
+		static const int audioBuffers = 1024;
 };
 
 #endif /* _SONIDO_H */

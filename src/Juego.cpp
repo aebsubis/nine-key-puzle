@@ -25,8 +25,7 @@ Juego::Juego()
 	SURFsaliendo = NULL;
 	SURFcompletado = NULL;
 	SURFreloj = NULL;
-	SURFtiempo = NULL;
-	SURFmovimientos = NULL;
+	SURFtexto = NULL;
 	FONTfuente = NULL;
 
 	// Iniciamos el temporizador.
@@ -34,6 +33,12 @@ Juego::Juego()
 	iteracionAnterior = 0;
 	temporizadorReloj = 0;
 	temporizadorJuego = 0;
+
+	// Mejor número de movimientos del puzle.
+	mejorMovimiento = 0;
+
+	// Mejor tiempo del puzle.
+	mejorTiempo = 0;
 
 	// Movimientos realizados.
 	contadorMovimientos = 0;
@@ -50,6 +55,9 @@ Juego::Juego()
 	// Selecciones a 0.
 	fichaSeleccionada1 = 0;
 	fichaSeleccionada2 = 0;
+
+	// Inicializamos la semilla del rand.
+	srand(time(NULL));
 }
 
 // Destructor.
@@ -297,132 +305,15 @@ void Juego::eventosMenu()
 		{
 			if (event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_RIGHT)
 			{
-				// Seleccionamos el puzle actual.
-				list<Puzle*>::iterator pos = puzles.begin();
-				int explorandoPosicion = 0;
-				bool encontrado = false;
-				while( pos != puzles.end() && encontrado == false)
-				{
-					if(explorandoPosicion == numPuzleActual)
-					{
-						puzleActual = *pos;
-						encontrado = true;
-					}
-					pos++;
-					explorandoPosicion++;
-				}
-
-				if(encontrado == true)
-				{
-					// Dificultad facil.
-					puzleActual->setTamano(3);
-
-					// Removemos el puzle.
-					puzleActual->remover();
-
-					// Pasamos a jugar.
-					estado = 1;
-
-					// Reproducimos el sonido.
-					sRemover.reproducir();
-
-					// Iniciamos el contador de tiempo.
-					temporizadorJuego = SDL_GetTicks();
-
-					// Reiniciamos los movimientos.
-					contadorMovimientos = 0;
-				}
-				else
-				{
-					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
-					salir = true;
-				}
+				cargarPuzle(3);
 			}
 			if (event.key.keysym.sym == SDLK_KP5)
 			{
-				// Seleccionamos el puzle actual.
-				list<Puzle*>::iterator pos = puzles.begin();
-				int explorandoPosicion = 0;
-				bool encontrado = false;
-				while( pos != puzles.end() && encontrado == false)
-				{
-					if(explorandoPosicion == numPuzleActual)
-					{
-						puzleActual = *pos;
-						encontrado = true;
-					}
-					pos++;
-					explorandoPosicion++;
-				}
-
-				if(encontrado == true)
-				{
-					// Dificultad media.
-					puzleActual->setTamano(4);
-
-					// Removemos el puzle.
-					puzleActual->remover();
-
-					// Pasamos a jugar.
-					estado = 1;
-
-					// Reproducimos el sonido.
-					sRemover.reproducir();
-
-					// Iniciamos el contador de tiempo.
-					temporizadorJuego = SDL_GetTicks();
-
-					// Reiniciamos los movimientos.
-					contadorMovimientos = 0;
-				}
-				else
-				{
-					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
-					salir = true;
-				}
+				cargarPuzle(4);
 			}
 			else if (event.key.keysym.sym == SDLK_KP6)
 			{
-				// Seleccionamos el puzle actual.
-				list<Puzle*>::iterator pos = puzles.begin();
-				int explorandoPosicion = 0;
-				bool encontrado = false;
-				while( pos != puzles.end() && encontrado == false)
-				{
-					if(explorandoPosicion == numPuzleActual)
-					{
-						puzleActual = *pos;
-						encontrado = true;
-					}
-					pos++;
-					explorandoPosicion++;
-				}
-
-				if(encontrado == true)
-				{
-					// Dificultad dificil.
-					puzleActual->setTamano(5);
-
-					// Removemos el puzle.
-					puzleActual->remover();
-
-					// Pasamos a jugar.
-					estado = 1;
-
-					// Reproducimos el sonido.
-					sRemover.reproducir();
-
-					// Iniciamos el contador de tiempo.
-					temporizadorJuego = SDL_GetTicks();
-
-					// Reiniciamos los movimientos.
-					contadorMovimientos = 0;
-				}
-				else
-				{
-					cout << "<Error>Juego:eventosMenu - Juego no encontrado.";
-					salir = true;
-				}
+				cargarPuzle(5);
 			}
 			else if (event.key.keysym.sym == SDLK_KP9 || event.key.keysym.sym == SDLK_ESCAPE)
 			{
@@ -710,6 +601,14 @@ void Juego::actualizarJuego()
 		// Hacemos un render con el texto de la victoria.
 		renderJuego();
 
+		// Guardamos las estadísticas (si son mejores).
+		Uint32 tiempoTranscurrido = SDL_GetTicks() - temporizadorJuego;
+		if(tiempoTranscurrido < mejorTiempo)
+			setMejorTiempo("puzles/"+puzleActual->getRuta(), tiempoTranscurrido);
+
+		if(contadorMovimientos < mejorMovimiento)
+			setMejorMovimiento("puzles/"+puzleActual->getRuta(), contadorMovimientos);
+		
 		// Detenemos el juego durante un tiempo.
 		iteracionAnterior = SDL_GetTicks();
 
@@ -739,6 +638,11 @@ void Juego::renderJuego()
 	// Comprobamos si está solucionado.
 	bool solucionado = puzleActual->solucionado();
 
+	
+	///////////////////////////
+	// PANEL DE ESTADÍSTICAS //
+	///////////////////////////
+
 	// Dibujamos el reloj.
 	corte.w = 50;
 	corte.h = 50;
@@ -748,75 +652,68 @@ void Juego::renderJuego()
 	posicion.y = 45;
 	SDL_BlitSurface(SURFreloj, &corte, SURFscreen, &posicion);
 
-	// Dibujamos las estadísticas.
-	char msg[30] = "0";
-	char cDias[4] = "0";
-	char cHoras[3] = "0";
-	char cMinutos[3] = "0";
-	char cSegundos[3] = "0";
-
+	// Color del texto
 	SDL_Color color;
 	color.r = 255;
 	color.g = 255;
 	color.b = 255;
 
-	Uint32 tiempoTranscurrido = (SDL_GetTicks() - temporizadorJuego)/1000;
-
-	int dias = (tiempoTranscurrido/86400)%365;
-	int horas = (tiempoTranscurrido/3600)%24;
-	int minutos = (tiempoTranscurrido/60)%60;
-	int segundos = tiempoTranscurrido%60;
-
-	if(segundos < 10)
-		sprintf(cSegundos, "0%d", segundos);
-	else
-		sprintf(cSegundos, "%d", segundos);
-
-	if(minutos < 10)
-		sprintf(cMinutos, "0%d", minutos);
-	else
-		sprintf(cMinutos, "%d", minutos);
-
-	if(horas < 10)
-		sprintf(cHoras, "0%d", horas);
-	else
-		sprintf(cHoras, "%d", horas);
-
-	if(dias < 10)
-		sprintf(cDias, "0%d", dias);
-	else
-		sprintf(cDias, "%d", dias);
-
-	
-	if(horas > 0)
-	{
-		if(dias > 0)
-		{
-			sprintf(msg, "%s:%s:%s:%s",cDias, cHoras, cMinutos, cSegundos);
-		}
-		else
-		{
-			sprintf(msg, "%s:%s:%s", cHoras, cMinutos, cSegundos);
-
-		}
-	}
-	else
-	{
-		sprintf(msg, "%s:%s", cMinutos, cSegundos);
-	}
-	
-
-	SURFtiempo = TTF_RenderText_Blended(FONTfuente, msg, color);
+	// Dibujamos el tiempo transcurrido.
 	posicion.x = 80;
-	posicion.y = 65;		
-	SDL_BlitSurface(SURFtiempo, NULL, SURFscreen, &posicion);
+	posicion.y = 50;
+	Uint32 tiempoTranscurrido = SDL_GetTicks() - temporizadorJuego;
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, "Actual:", color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
+	posicion.x = 150;
+	posicion.y = 50;
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, formatoTiempo(tiempoTranscurrido), color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
 
+	// Dibujamos el mejor tiempo del puzle.
+	posicion.x = 80;
+	posicion.y = 80;
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, "Mejor:", color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
+	posicion.x = 150;
+	posicion.y = 80;
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, formatoTiempo(mejorTiempo), color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
+
+	// Dibujamos los movimientos realizados.
+	char msg[30] = "0";
 	posicion.x = 18;
-	posicion.y = 95;
-	sprintf(msg,"Movimientos: %d",contadorMovimientos);
-	SURFmovimientos = TTF_RenderText_Blended(FONTfuente, msg, color);
-	SDL_BlitSurface(SURFmovimientos, NULL, SURFscreen, &posicion);
+	posicion.y = 130;
+	sprintf(msg,"Movimientos actuales: %d",contadorMovimientos);
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, msg, color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
 
+	// Dibujamos los mejores movimientos.
+	posicion.x = 18;
+	posicion.y = 160;
+	sprintf(msg,"Minimo movimientos: %d",mejorMovimiento);
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, msg, color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
+
+	// Texto "miniatura".
+	posicion.x = 80;
+	posicion.y = 330;
+	sprintf(msg,"MINIATURA");
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, msg, color);
+	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
+
+	// Dibujamos la miniatura del puzle en juego.
+	posicion.x = 18;
+	posicion.y = 350;
+
+	// Dibujamos la miniatura.
+	SDL_BlitSurface(puzleActual->getMedio(), NULL, SURFscreen, &posicion);
+
+
+
+	////////////////////
+	// PANEL DE PUZLE //
+	////////////////////
+	
 	// Dibujamos el puzle actual.
 	for(int i=0; i<puzleActual->getTamano(); i++)
 	{
@@ -840,12 +737,7 @@ void Juego::renderJuego()
 		}
 	}
 
-	// Dibujamos la miniatura del puzle en juego.
-	posicion.x = 18;
-	posicion.y = 350;
-
-	// Dibujamos la miniatura.
-	SDL_BlitSurface(puzleActual->getMedio(), NULL, SURFscreen, &posicion);
+	
 
 
 	// Dibujamos el progreso de salir.
@@ -922,4 +814,306 @@ void Juego::dibujarProgresoSalir()
 			SDL_BlitSurface(SURFsaliendo, NULL, SURFscreen, &rectangulo);
 		}
 	}
+}
+
+
+
+// Devuelve el mejor tiempo del puzle.
+Uint32 Juego::getMejorTiempo(string rutaPuzle)
+{
+	int leido = false;
+	Uint32 mejorTiempo = 0;
+
+	#ifdef WIN32
+
+	WIN32_FIND_DATA findFileData;
+	HANDLE hFind;
+
+	string rutaPuzleAux = rutaPuzle + "/*";
+	hFind = FindFirstFile(rutaPuzleAux.c_str(), &findFileData);
+
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			string nombre = string(findFileData.cFileName);
+			if(nombre == "estatisticas.txt")
+			{
+				leido = true;
+				ifstream fichero;
+				string ruta = rutaPuzle + "/" + nombre;
+				fichero.open(ruta.c_str(), ios::in);
+				if (fichero.is_open())
+				{
+					try
+					{
+						fichero >> mejorTiempo;
+					}
+					catch(...)
+					{
+						// El fichero no se puede leer.
+					}
+					fichero.close();
+				}
+				else
+				{
+					// El fichero no se puede leer.
+				}
+			}
+		}
+		while (FindNextFile(hFind, &findFileData) != 0 && leido == false);
+	}
+
+	#else
+
+	DIR* dp = NULL;
+	struct dirent* dirp = NULL;
+	// Abrimos el directorio.
+    if ((dp  = opendir(rutaPuzle.c_str())) != NULL)
+    {
+		// Leemos todas las entradas.
+		while ((dirp = readdir(dp)) != NULL && leido == false)
+		{
+			string nombre = string(dirp->d_name);
+			if(nombre=="estadisticas.txt")
+			{
+				leido = true;
+				ifstream fichero;
+				string ruta = rutaPuzle + "/" + nombre;
+				fichero.open(ruta.c_str(), ios::in);
+
+				if (fichero.is_open())
+				{
+					// Si podemos leer, es un fichero. Si no, es un directorio.
+					try
+					{
+						fichero >> mejorTiempo;
+					}
+					catch(...)
+					{
+						// El fichero no se puede leer.
+					}
+					fichero.close();
+				}
+			}
+		}
+
+		// Cerramos el directorio.
+		closedir(dp);
+	}
+
+	#endif
+
+	return mejorTiempo;
+}
+
+// Devuelve los mejores movimientos del puzle.
+int Juego::getMejorMovimiento(string rutaPuzle)
+{
+	int leido = false;
+	int mejorMovimiento = 0;
+
+	#ifdef WIN32
+
+	WIN32_FIND_DATA findFileData;
+	HANDLE hFind;
+
+	string rutaPuzleAux = rutaPuzle + "/*";
+	hFind = FindFirstFile(rutaPuzleAux.c_str(), &findFileData);
+
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			string nombre = string(findFileData.cFileName);
+			if(nombre == "estatisticas.txt")
+			{
+				leido = true;
+				ifstream fichero;
+				string ruta = rutaPuzle + "/" + nombre;
+				fichero.open(ruta.c_str(), ios::in);
+				if (fichero.is_open())
+				{
+					try
+					{
+						fichero >> mejorMovimiento;
+						fichero >> mejorMovimiento;
+					}
+					catch(...)
+					{
+						// El fichero no se puede leer.
+					}
+					fichero.close();
+				}
+				else
+				{
+					// El fichero no se puede leer.
+				}
+			}
+		}
+		while (FindNextFile(hFind, &findFileData) != 0 && leido == false);
+	}
+
+	#else
+
+	DIR* dp = NULL;
+	struct dirent* dirp = NULL;
+	// Abrimos el directorio.
+    if ((dp  = opendir(rutaPuzle.c_str())) != NULL)
+    {
+		// Leemos todas las entradas.
+		while ((dirp = readdir(dp)) != NULL && leido == false)
+		{
+			string nombre = string(dirp->d_name);
+			if(nombre=="estadisticas.txt")
+			{
+				leido = true;
+				ifstream fichero;
+				string ruta = rutaPuzle + "/" + nombre;
+				fichero.open(ruta.c_str(), ios::in);
+
+				if (fichero.is_open())
+				{
+					// Si podemos leer, es un fichero. Si no, es un directorio.
+					try
+					{
+						fichero >> mejorMovimiento;
+						fichero >> mejorMovimiento;
+					}
+					catch(...)
+					{
+						// El fichero no se puede leer.
+					}
+					fichero.close();
+				}
+			}
+		}
+
+		// Cerramos el directorio.
+		closedir(dp);
+	}
+
+	#endif
+
+	return mejorMovimiento;
+}
+
+void Juego::cargarPuzle(int tamano)
+{
+	// Seleccionamos el puzle actual.
+	list<Puzle*>::iterator pos = puzles.begin();
+	int explorandoPosicion = 0;
+	bool encontrado = false;
+	while( pos != puzles.end() && encontrado == false)
+	{
+		if(explorandoPosicion == numPuzleActual)
+		{
+			puzleActual = *pos;
+			encontrado = true;
+		}
+		pos++;
+		explorandoPosicion++;
+	}
+
+	if(encontrado == true)
+	{
+		// Dificultad facil.
+		puzleActual->setTamano(tamano);
+
+		// Removemos el puzle.
+		puzleActual->remover();
+
+		// Pasamos a jugar.
+		estado = 1;
+
+		// Reproducimos el sonido.
+		sRemover.reproducir();
+
+		// Obtenemos el mejor tiempo del puzle.
+		mejorTiempo = getMejorTiempo("puzles/"+puzleActual->getRuta());
+
+		// Obtenemos la mejor cantidad de movimientos dle puzle.
+
+
+		// Iniciamos el contador de tiempo.
+		temporizadorJuego = SDL_GetTicks();
+
+		// Reiniciamos los movimientos.
+		contadorMovimientos = 0;
+	}
+	else
+	{
+		cout << "<Error>Juego::cargarPuzle - Puzle no encontrado.";
+		salir = true;
+	}
+}
+
+// Establece el valor del mejor tiempo.
+void Juego::setMejorTiempo(string ruta, Uint32 mejorTiempo)
+{
+
+}
+
+// Establece el valor del mejor movimiento.
+void Juego::setMejorMovimiento(string ruta, int mejorMovimiento)
+{
+
+}
+
+
+// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
+char* Juego::formatoTiempo(Uint32 tiempo)
+{
+	char msg[30] = "0";
+	char cDias[4] = "0";
+	char cHoras[3] = "0";
+	char cMinutos[3] = "0";
+	char cSegundos[3] = "0";
+
+	Uint32 tiempoTranscurrido = tiempo/1000;
+
+	int dias = (tiempoTranscurrido/86400)%365;
+	int horas = (tiempoTranscurrido/3600)%24;
+	int minutos = (tiempoTranscurrido/60)%60;
+	int segundos = tiempoTranscurrido%60;
+
+	if(segundos < 10)
+		sprintf(cSegundos, "0%d", segundos);
+	else
+		sprintf(cSegundos, "%d", segundos);
+
+	if(minutos < 10)
+		sprintf(cMinutos, "0%d", minutos);
+	else
+		sprintf(cMinutos, "%d", minutos);
+
+	if(horas < 10)
+		sprintf(cHoras, "0%d", horas);
+	else
+		sprintf(cHoras, "%d", horas);
+
+	if(dias < 10)
+		sprintf(cDias, "0%d", dias);
+	else
+		sprintf(cDias, "%d", dias);
+
+
+	if(horas > 0)
+	{
+		if(dias > 0)
+		{
+			sprintf(msg, "%s:%s:%s:%s",cDias, cHoras, cMinutos, cSegundos);
+		}
+		else
+		{
+			sprintf(msg, "%s:%s:%s", cHoras, cMinutos, cSegundos);
+
+		}
+	}
+	else
+	{
+		sprintf(msg, "%s:%s", cMinutos, cSegundos);
+	}
+
+	return msg;
 }
