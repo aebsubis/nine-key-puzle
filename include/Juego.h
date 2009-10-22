@@ -84,7 +84,7 @@ private:
 	void cargarPuzle(int tamano);
 
 	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
-	char* formatoTiempo(Uint32 tiempo);
+	string formatoTiempo(Uint32 tiempo);
 
 	// Indica si se debe salir.
 	bool salir;

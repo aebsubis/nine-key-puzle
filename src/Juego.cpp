@@ -430,9 +430,14 @@ void Juego::renderMenu()
 				// También lo dibujamos en grande.
 				posicion.x = 250;
 				posicion.y = 50;
+				SDL_Rect corte;
+				corte.x = 0;
+				corte.y = 0;
+				corte.w = 500;
+				corte.h = 500;
 
 				// Dibujamos la imagen.
-				SDL_BlitSurface(activo->getGrande(), NULL, SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getGrande(), &corte, SURFscreen, &posicion);
 			}
 
 			numMiniatura++;
@@ -666,7 +671,7 @@ void Juego::renderJuego()
 	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
 	posicion.x = 150;
 	posicion.y = 50;
-	SURFtexto = TTF_RenderText_Blended(FONTfuente, formatoTiempo(tiempoTranscurrido), color);
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, formatoTiempo(tiempoTranscurrido).c_str(), color);
 	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
 
 	// Dibujamos el mejor tiempo del puzle.
@@ -676,7 +681,7 @@ void Juego::renderJuego()
 	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
 	posicion.x = 150;
 	posicion.y = 80;
-	SURFtexto = TTF_RenderText_Blended(FONTfuente, formatoTiempo(mejorTiempo), color);
+	SURFtexto = TTF_RenderText_Blended(FONTfuente, formatoTiempo(mejorTiempo).c_str(), color);
 	SDL_BlitSurface(SURFtexto, NULL, SURFscreen, &posicion);
 
 	// Dibujamos los movimientos realizados.
@@ -1062,7 +1067,7 @@ void Juego::setMejorMovimiento(string ruta, int mejorMovimiento)
 
 
 // Devuelve el tiempo en formato (dd:)(hh:)mm:ss
-char* Juego::formatoTiempo(Uint32 tiempo)
+string Juego::formatoTiempo(Uint32 tiempo)
 {
 	char msg[30] = "0";
 	char cDias[4] = "0";
