@@ -27,6 +27,32 @@ Sonido::Sonido ()
 	}
 }
 
+// Constructor sobrecargado.
+Sonido::Sonido (string nomSonido)
+{
+	channel = -1;
+	numSonidos ++;
+	cargado = true;
+	this->nomSonido = nomSonido;
+
+	// Es el primer sonido; ajustamos los valores del audio.
+	if (numSonidos==1)
+	{
+		if (Mix_OpenAudio(audioRate, audioFormat, audioChannels, audioBuffers) != 0)
+		{
+			cerr << "ERROR: No se ha podido inicializar el audio: " << Mix_GetError() << endl;
+			exit(1);
+		}
+	}
+
+	sonido = Mix_LoadWAV(this->nomSonido.c_str());
+	if(sonido == NULL)
+	{
+		cargado = false;
+		cerr << "ERROR: No se pudo cargar el fichero WAV: " << Mix_GetError() << endl;
+	}
+}
+
 // Destructor.
 Sonido::~Sonido ()
 {

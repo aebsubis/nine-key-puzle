@@ -22,6 +22,11 @@ class Sonido
 		 */
 		Sonido ();
 
+		/// Constructor sobrecargado.
+		/** Si es el primer sonido, abre el manejador de audio de SDL.
+		 */
+		Sonido (string nomSonido="");
+
 		/// Destructor.
 		/** Libera la memoria reservada.
 		 * Si es el último sonido, también cierra el manejador de audio de SDL.

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Juego.h"
+#include "include/Juego.h"
 
 using namespace std;
 
@@ -8,7 +9,7 @@ using namespace std;
  */
 int main(int argc, char** argv)
 {
-	Juego juego;
-	juego.iniciar();
+	Juego* juego = Juego::getInstancia();
+	juego->iniciar();
 }
 

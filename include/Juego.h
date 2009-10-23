@@ -3,62 +3,113 @@
 
 #include <iostream>
 #include <list>
+#include <map>
+
+
 #include <SDL/SDL_video.h>
 #include <SDL/SDL_events.h>
 #include "SDL.h"
 #include "SDL/SDL_ttf.h"
 #include "SDL/SDL_image.h"
+
+
 #include "Puzle.h"
 #include "Sonido.h"
 #include "Directorio.h"
 
+class Juego;
+#include "Estado.h"
+#include "Juego_EstadoJugando.h"
+#include "Juego_EstadoMenu.h"
+
 using namespace std;
 
 /* Clase juego.
- *
+ * La clase juego está diseñada con el patrón sigletón.
  */
 class Juego
 {
+	// El estado puede acceder a los miembros privados del juego. (Intentar evitar).
+	friend class Juego_EstadoMenu;
+	friend class Juego_EstadoJugando;
 public:
 
-	// Constructor por defecto.
-	Juego();
-
+	/// Devuelve la instancia de la clase.
+	static Juego* getInstancia();
+	
 	// Destructor.
 	~Juego();
+
+	// Inicializa el juego.
+	void inicializar();
 
 	// Inicia el juego.
 	void iniciar();
 
+	// Procesa los eventos.
+	void eventos();
+
+	// Actualiza.
+	void actualizar();
+
+	// Hace un render.
+	void render();
+
+	// Modifica el estado del juego.
+	void setEstado(Estado<Juego>* estado);
+
+	// Finaliza el juego.
+	void finalizar();
+
+	// Establece como puzle actual el puzle anterior.
+	void puzzleAnterior();
+
+	// Establece como puzle actual el puzzle siguiente.
+	void puzzleSiguiente();
+
+	// Indica si se debe salir.
+	bool getSalir();
+
+	// Establece si se debe salir.
+	void setSalir(bool salir);
+
 private:
+
+	// Constructor privado.
+	Juego();
+
+	// Reproduce el sonido que recibe por parámetro.
+	void reproducirSonido(string sonido);
 
 	// Inicializa SDL.
 	void inicializaSDL();
 
-	// Procesa los eventos del menú.
-	void eventosMenu();
-
-	// Actualiza el menu.
-	void actualizarMenu();
-
-	// Hace un render del menú.
-	void renderMenu();
-
-	// Procesa los eventos del juego.
-	void eventosJuego();
-
-	// Actualiza el juego.
-	void actualizarJuego();
-
-	// Hace un render del juego.
-	void renderJuego();
-
-	// Carga todos los puzles.
-	void cargarPuzles();
-
-	// Dibuja la barra de progreso para salir
-	void dibujarProgresoSalir();
+	// Inicializa el sonido.
+	void inicializaSonido();
 	
+	// Inicializa los puzles.
+	void inicializaPuzzles();
+	
+	// Finaliza SDL.
+	void finalizaSDL();
+
+	// Finaliza el sonido.
+	void finalizaSonido();
+
+	// Finaliza los puzles.
+	void finalizaPuzzles();
+
+	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
+	string formatoTiempo(Uint32 tiempo);
+
+
+
+	/// Instancia de la clase
+	static Juego* instancia;
+
+	// Indica el estado actual del juego.
+	Estado<Juego>* estado;
+
 	// Listado de puzles disponibles.
 	list<Puzle*> puzles;
 
@@ -67,6 +118,27 @@ private:
 
 	// Número de puzle que se va a jugar o se está jugando.
 	int numPuzleActual;
+
+	// Mapa de sonidos.
+	map<string, Sonido*> sonidos;
+
+	// Indica si se debe salir.
+	bool salir;
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// Dibuja la barra de progreso para salir
+	void dibujarProgresoSalir();	
 
 	// Devuelve el mejor tiempo del puzle.
 	Uint32 getMejorTiempo(string rutaPuzle);
@@ -83,16 +155,10 @@ private:
 	// Carga el puzle actual con el tamaño indicado.
 	void cargarPuzle(int tamano);
 
-	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
-	string formatoTiempo(Uint32 tiempo);
+	
 
-	// Indica si se debe salir.
-	bool salir;
 
-	// Indica el estado del juego.
-	// 0 = menú principal.
-	// 1 = jugando
-	int estado;
+
 
 
 	// Pantalla sobre la que se dibuja.
@@ -122,13 +188,7 @@ private:
 	// Fuente utilizada.
 	TTF_Font* FONTfuente;
 	
-	// Sonidos
-	Sonido sIntercambiar;
-	Sonido sSeleccionar;
-	Sonido sMenu;
-	Sonido sRemover;
-	Sonido sVictoria;
-        Sonido sFondo;
+	
 
 	// Contadores.
 	Uint32 temporizadorEscape;
@@ -153,12 +213,6 @@ private:
 
 	// Tiempo de delay en desplazamiento.
 	int delay;
-
-	// Ficha seleccionada 1.
-	int fichaSeleccionada1;
-
-	// Ficha seleccionada 2.
-	int fichaSeleccionada2;
 };
 
 #endif	/* _JUEGO_H */
