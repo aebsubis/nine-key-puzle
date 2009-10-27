@@ -36,12 +36,12 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 		{
 			if (event.key.keysym.sym == SDLK_KP2 || event.key.keysym.sym == SDLK_DOWN)
 			{
-				// Elegimos el puzle de abajo.
+				// Elegimos el puzzle de arriba.
 				juego->puzzleAnterior();
 			}
 			else if (event.key.keysym.sym == SDLK_KP8 || event.key.keysym.sym == SDLK_UP)
 			{
-				// Elegimos el puzle de arriba.
+				// Elegimos el puzzle de abajo.
 				juego->puzzleSiguiente();
 			}
 			else if (event.key.keysym.sym == SDLK_KP9)
@@ -60,49 +60,108 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 		{
 			if (event.key.keysym.sym == SDLK_2)
 			{
-				// Carga el puzleActual a tamaño 2x2.
-				juego->cargarPuzle(2);
+				// Carga el puzzleActual a tamaño 2x2.
+				juego->cargarPuzzle(2);
 			}
 			else if (event.key.keysym.sym == SDLK_3 || event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_RIGHT)
 			{
-				// Carga el puzleActual a tamaño 3x3.
-				juego->cargarPuzle(3);
+				// Carga el puzzleActual a tamaño 3x3.
+				juego->cargarPuzzle(3);
 			}
 			else if (event.key.keysym.sym == SDLK_4 || event.key.keysym.sym == SDLK_KP5)
 			{
-				// Carga el puzleActual a tamaño 4x4.
-				juego->cargarPuzle(4);
+				// Carga el puzzleActual a tamaño 4x4.
+				juego->cargarPuzzle(4);
 			}
 			else if (event.key.keysym.sym == SDLK_5 || event.key.keysym.sym == SDLK_KP6)
 			{
-				// Carga el puzleActual a tamaño 4x4.
-				juego->cargarPuzle(5);
+				// Carga el puzzleActual a tamaño 4x4.
+				juego->cargarPuzzle(5);
 			}
 			else if (event.key.keysym.sym == SDLK_6)
 			{
-				// Carga el puzleActual a tamaño 6x6.
-				juego->cargarPuzle(6);
+				// Carga el puzzleActual a tamaño 6x6.
+				juego->cargarPuzzle(6);
 			}
 			else if (event.key.keysym.sym == SDLK_7)
 			{
-				// Carga el puzleActual a tamaño 7x7.
-				juego->cargarPuzle(7);
+				// Carga el puzzleActual a tamaño 7x7.
+				juego->cargarPuzzle(7);
 			}
 			else if (event.key.keysym.sym == SDLK_8)
 			{
-				// Carga el puzleActual a tamaño 8x8.
-				juego->cargarPuzle(8);
+				// Carga el puzzleActual a tamaño 8x8.
+				juego->cargarPuzzle(8);
 			}
 			else if( event.key.keysym.sym == SDLK_9)
 			{
-				// Carga el puzleActual a tamaño 9x9.
-				juego->cargarPuzle(9);
+				// Carga el puzzleActual a tamaño 9x9.
+				juego->cargarPuzzle(9);
 			}
 			else if (event.key.keysym.sym == SDLK_KP9)
 			{
 				// Al soltar la tecla 9 se reinicia el temporizador para forzar la salida.
 				juego->temporizadorEscape = 0;
 			}
+		}
+		else if(event.type == SDL_MOUSEMOTION)
+		{
+			int mouse_x, mouse_y;
+
+			SDL_GetMouseState(&mouse_x, &mouse_y);
+			if ( (mouse_x < 32) && (mouse_y < 32) )
+			{
+				//cout << "loool" << endl;
+			}
+
+		}
+		else if(event.type == SDL_MOUSEBUTTONDOWN)
+		{
+			if(event.button.button == SDL_BUTTON_LEFT)
+			{
+				// Obtenemos las coordenadas del ratón.
+				int mouse_x, mouse_y;
+				SDL_GetMouseState(&mouse_x, &mouse_y);
+
+				// Comprobamos a que zona pertenecen.
+				if(zona(mouse_x, mouse_y, 0, 0, 240, 240))
+				{
+					// Elegimos el puzzle de arriba.
+					juego->puzzleSiguiente();
+				}
+				else if(zona(mouse_x, mouse_y, 0, 240, 240, 360))
+				{
+					// Carga el puzzleActual a tamaño 3x3.
+					juego->cargarPuzzle(3);
+				}
+				else if(zona(mouse_x, mouse_y, 0, 360, 240, 600))
+				{
+					// Elegimos el puzzle de abajo.
+					juego->puzzleAnterior();
+				}
+			}
+			else if(event.button.button == SDL_BUTTON_RIGHT)
+			{
+
+			}
+			else if(event.button.button == SDL_BUTTON_MIDDLE)
+			{
+
+			}
+			else if(event.button.button == SDL_BUTTON_WHEELUP)
+			{
+				// Elegimos el puzzle de abajo.
+				juego->puzzleAnterior();
+			}
+			else if(event.button.button == SDL_BUTTON_WHEELDOWN)
+			{
+				// Elegimos el puzzle de arriba.
+				juego->puzzleSiguiente();
+			}
+		}
+		else if(event.type == SDL_QUIT)
+		{
+			juego->setSalir(true);
 		}
 	}
 }
@@ -125,18 +184,18 @@ void Juego_EstadoMenu::actualizar(Juego* juego)
 void Juego_EstadoMenu::render(Juego* juego)
 {
 	// Limpiar pantalla
-	SDL_FillRect(juego->SURFscreen, 0, SDL_MapRGB(juego->SURFscreen->format, 0, 0, 0));
+	SDL_FillRect(juego->getSuperficie("screen"), 0, SDL_MapRGB(juego->getSuperficie("screen")->format, 0, 0, 0));
 
 	// Fondo.
-	SDL_BlitSurface(juego->SURFfondo, NULL, juego->SURFscreen, NULL);
+	SDL_BlitSurface(juego->getSuperficie("fondoMenu"), NULL, juego->getSuperficie("screen"), NULL);
 
-	// Dibujamos el listado de puzles.
-	if(juego->puzles.size() > 0)
+	// Dibujamos el listado de puzzles.
+	if(juego->puzzles.size() > 0)
 	{
 		// Iterador de la lista.
-		list<Puzle*>::iterator pos;
+		list<Puzzle*>::iterator pos;
 
-		// Almacena la posición del puzle que estamos explorando en la lista.
+		// Almacena la posición del puzzle que estamos explorando en la lista.
 		int explorandoPosicion;
 
 		// Almacena la posición de la miniatura inicial.
@@ -146,14 +205,14 @@ void Juego_EstadoMenu::render(Juego* juego)
 		int numMiniatura;
 
 		// Buscamos la posición de la miniatura inicial.
-		miniaturaInicial = juego->numPuzleActual-3;
+		miniaturaInicial = juego->numPuzzleActual-3;
 		while(miniaturaInicial<0)
 		{
-			miniaturaInicial = juego->puzles.size() + miniaturaInicial;
+			miniaturaInicial = juego->puzzles.size() + miniaturaInicial;
 		}
 
 		// Nos desplazamos hasta la miniatura inicial.
-		pos = juego->puzles.begin();
+		pos = juego->puzzles.begin();
 		explorandoPosicion = 0;
 		bool encontrado = false;
 		while( encontrado == false)
@@ -174,7 +233,7 @@ void Juego_EstadoMenu::render(Juego* juego)
 		while( numMiniatura <= 3 )
 		{
 			// Obtenemos el puzzle de la lista que estamos explorando.
-			Puzle* activo = *pos;
+			Puzzle* activo = *pos;
 
 			// Calculamos la posición de la miniatura.
 			SDL_Rect posicion;
@@ -185,7 +244,7 @@ void Juego_EstadoMenu::render(Juego* juego)
 				posicion.y = 250 - 150*(numMiniatura) + juego->delay;
 
 				// Dibujamos la miniatura.
-				SDL_BlitSurface(activo->getPequeno(), NULL, juego->SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getPequeno(), NULL, juego->getSuperficie("screen"), &posicion);
 			}
 			else if(numMiniatura < 0)
 			{
@@ -193,7 +252,7 @@ void Juego_EstadoMenu::render(Juego* juego)
 				posicion.y = 250 - 150*(numMiniatura) + juego->delay;
 
 				// Dibujamos la miniatura.
-				SDL_BlitSurface(activo->getPequeno(), NULL, juego->SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getPequeno(), NULL, juego->getSuperficie("screen"), &posicion);
 			}
 			else if(numMiniatura == 0)
 			{
@@ -201,7 +260,7 @@ void Juego_EstadoMenu::render(Juego* juego)
 				posicion.y = 250 - 150*(numMiniatura) + juego->delay;
 
 				// Dibujamos la miniatura.
-				SDL_BlitSurface(activo->getPequeno(), NULL, juego->SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getPequeno(), NULL, juego->getSuperficie("screen"), &posicion);
 
 				// También lo dibujamos en grande.
 				posicion.x = 250;
@@ -213,7 +272,7 @@ void Juego_EstadoMenu::render(Juego* juego)
 				corte.h = 500;
 
 				// Dibujamos la imagen.
-				SDL_BlitSurface(activo->getGrande(), &corte, juego->SURFscreen, &posicion);
+				SDL_BlitSurface(activo->getGrande(), &corte, juego->getSuperficie("screen"), &posicion);
 			}
 
 			numMiniatura++;
@@ -221,10 +280,10 @@ void Juego_EstadoMenu::render(Juego* juego)
 			pos++;
 
 			// Si hemos completado la lista, empezamos de 0.
-			if(pos == juego->puzles.end())
+			if(pos == juego->puzzles.end())
 			{
 				explorandoPosicion = 0;
-				pos = juego->puzles.begin();
+				pos = juego->puzzles.begin();
 			}
 		}
 
@@ -240,5 +299,11 @@ void Juego_EstadoMenu::render(Juego* juego)
 	juego->dibujarProgresoSalir();
 
 	// Refrescamos la pantalla.
-	SDL_Flip (juego->SURFscreen);
+	SDL_Flip (juego->getSuperficie("screen"));
+}
+
+// Comprueba si una coordenada se encuentra en un zona.
+bool Juego_EstadoMenu::zona(int posicion_x, int posicion_y, int origen_x, int origen_y, int destino_x, int destino_y)
+{
+	return (posicion_x >= origen_x && posicion_x <= destino_x) && (posicion_y >= origen_y && posicion_y <= destino_y);
 }

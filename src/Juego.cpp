@@ -88,13 +88,13 @@ void Juego::setEstado(Estado<Juego>* estado)
 	this->estado = estado;
 }
 
-// Establece como puzle actual el puzle anterior.
+// Establece como puzzle actual el puzzle anterior.
 void Juego::puzzleAnterior()
 {
-	if(numPuzleActual == 0)
-		numPuzleActual = puzles.size()-1;
+	if(numPuzzleActual == 0)
+		numPuzzleActual = puzzles.size()-1;
 	else
-		numPuzleActual--;
+		numPuzzleActual--;
 
 	// Añadimos el delay de 140.
 	delay = 140;
@@ -103,14 +103,14 @@ void Juego::puzzleAnterior()
 	reproducirSonido("menu");
 }
 
-// Establece como puzle actual el puzzle siguiente.
+// Establece como puzzle actual el puzzle siguiente.
 void Juego::puzzleSiguiente()
 {
-	// Elegimos el puzle de arriba.
-	if((unsigned)numPuzleActual == puzles.size()-1)
-		numPuzleActual = 0;
+	// Elegimos el puzzle de arriba.
+	if((unsigned)numPuzzleActual == puzzles.size()-1)
+		numPuzzleActual = 0;
 	else
-		numPuzleActual++;
+		numPuzzleActual++;
 
 	// Añadimos el delay de -140.
 	delay = -140;
@@ -129,27 +129,16 @@ Juego::Juego()
 	// Estado.
 	estado = NULL;
 
-	// Variables de SDL.
-	SURFscreen = NULL;
-	SURFfondo = NULL;
-	SURFfondo2 = NULL;
-	SURFsaliendo = NULL;
-	SURFcompletado = NULL;
-	SURFreloj = NULL;
-	SURFtexto = NULL;
+	// Fuente del texto.
 	FONTfuente = NULL;
 
 	// Iniciamos el temporizador.
 	temporizadorEscape = 0;
 	iteracionAnterior = 0;
 	temporizadorReloj = 0;
-	temporizadorJuego = 0;
 
-	// Mejor número de movimientos del puzle.
-	mejorMovimiento = 0;
-
-	// Mejor tiempo del puzle.
-	mejorTiempo = 0;
+	// Tiempo transcurrido.
+	contadorTiempo = 0;
 
 	// Movimientos realizados.
 	contadorMovimientos = 0;
@@ -189,12 +178,56 @@ void Juego::reproducirSonido(string sonido)
 	}
 }
 
+void Juego::cargarPuzzle(int tamano)
+{
+	// Seleccionamos el puzzle actual.
+	list<Puzzle*>::iterator pos = puzzles.begin();
+	int explorandoPosicion = 0;
+	bool encontrado = false;
+	while( pos != puzzles.end() && encontrado == false)
+	{
+		if(explorandoPosicion == numPuzzleActual)
+		{
+			puzzleActual = *pos;
+			encontrado = true;
+		}
+		pos++;
+		explorandoPosicion++;
+	}
+
+	if(encontrado == true)
+	{
+		// Dificultad facil.
+		puzzleActual->setTamano(tamano);
+
+		// Removemos el puzzle.
+		puzzleActual->remover();
+
+		// Pasamos a jugar.
+		setEstado(Juego_EstadoJugando::getInstancia());
+
+		// Reproducimos el sonido.
+		reproducirSonido("remover");
+
+		// Iniciamos el contador de tiempo.
+		contadorTiempo = SDL_GetTicks();
+
+		// Reiniciamos los movimientos.
+		contadorMovimientos = 0;
+	}
+	else
+	{
+		cout << "<Error>Juego::cargarPuzzle - Puzzle no encontrado.";
+		salir = true;
+	}
+}
+
 ///////////////////////////////////////////
 //////////// GETTERS & SETTERS ////////////
 ///////////////////////////////////////////
 
 // Indica si se debe salir.
-bool Juego::getSalir()
+bool Juego::getSalir() const
 {
 	return salir;
 }
@@ -203,6 +236,34 @@ bool Juego::getSalir()
 void Juego::setSalir(bool salir)
 {
 	this->salir = salir;
+}
+
+// Devuelve la superficie.
+SDL_Surface* Juego::getSuperficie(string nombre)
+{
+	return superficies[nombre];
+}
+
+// Establece la superficie.
+void Juego::setSuperficie(string nombre, SDL_Surface* superficie)
+{
+	SDL_Surface* sup = superficies[nombre];
+	if(sup != NULL)
+		SDL_FreeSurface(sup);
+
+	superficies[nombre] = superficie;
+}
+
+// Devuelve la fuente.
+TTF_Font* Juego::getFuente() const
+{
+	return FONTfuente;
+}
+
+// Establece la fuente.
+void Juego::setFuente(TTF_Font* fuente)
+{
+	this->FONTfuente = fuente;
 }
 
 /////////////////////////////////////////
@@ -241,41 +302,49 @@ void Juego::inicializaSDL()
 	// Establecemos un nombre y un icono para la ventana creada.
 	SDL_WM_SetCaption ((char *) "Nine-Key Puzzle", (char *) "Nine-Key Puzzle");
 
+	// Inicializamos las superficies.
+	superficies["screen"] = NULL;
+	superficies["fondoMenu"] = NULL;
+	superficies["fondoJuego"] = NULL;
+	superficies["saliendo"] = NULL;
+	superficies["completado"] = NULL;
+	superficies["reloj"] = NULL;
+	
 	// Activamos el modo de vídeo.
-	SURFscreen = SDL_SetVideoMode (800, 600, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
-	if (SURFscreen == NULL)
+	superficies["screen"] = SDL_SetVideoMode (800, 600, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	if (superficies["screen"] == NULL)
 	{
 		printf ("No se puede inicializar el modo gráfico: %s\n", SDL_GetError ());
 		exit (1);
 	}
 
 	// Cargamos la imagen de fondo.
-	SURFfondo = IMG_Load("data/fondo.jpg");
-	if (SURFfondo == NULL)
+	superficies["fondoMenu"] = IMG_Load("data/fondo.jpg");
+	if (superficies["fondoMenu"] == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	}
 
 	// Cargamos la imagen de fondo2.
-	SURFfondo2 = IMG_Load("data/fondo2.jpg");
-	if (SURFfondo2 == NULL)
+	superficies["fondoJuego"] = IMG_Load("data/fondo2.jpg");
+	if (superficies["fondoJuego"] == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	}
 
 	// Cargamos la imagen de completado.
-	SURFcompletado = IMG_Load("data/completado.png");
-	if (SURFcompletado == NULL)
+	superficies["completado"] = IMG_Load("data/completado.png");
+	if (superficies["completado"] == NULL)
 	{
 		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	}
 
 	// Cargamos la imagen del reloj.
-	SURFreloj = IMG_Load("data/reloj.jpg");
-	if (SURFreloj == NULL)
+	superficies["reloj"] = IMG_Load("data/reloj.jpg");
+	if (superficies["reloj"] == NULL)
 	{
 		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
@@ -300,7 +369,7 @@ void Juego::inicializaSDL()
 	color.r = 0;
 	color.g = 0;
 	color.b = 0;
-	SURFsaliendo = TTF_RenderText_Blended(FONTfuente, "Saliendo...", color);
+	superficies["saliendo"] = TTF_RenderText_Blended(FONTfuente, "Saliendo...", color);
 
 	// Repetición de teclas.
 	SDL_EnableKeyRepeat(100, 100);
@@ -325,7 +394,7 @@ void Juego::inicializaSonido()
 // Inicializa los puzzles.
 void Juego::inicializaPuzzles()
 {
-	Directorio directorio("puzles");
+	Directorio directorio("puzzles");
 	list<string> nombreDirectorios = directorio.getNombreDirectorios();
 	list<string>::iterator pos = nombreDirectorios.begin();
 	while (pos != nombreDirectorios.end())
@@ -333,20 +402,20 @@ void Juego::inicializaPuzzles()
 		string ruta = *pos;
 		if(ruta[0] != '.')
 		{
-			// Añadimos el puzle.
-			Puzle* puzle = new Puzle(ruta);
-			puzles.push_front(puzle);
+			// Añadimos el puzzle.
+			Puzzle* puzzle = new Puzzle(ruta);
+			puzzles.push_front(puzzle);
 		}
 		pos++;
 	}
 
-	// Número de puzle actual.
-	numPuzleActual = 0;
+	// Número de puzzle actual.
+	numPuzzleActual = 0;
 
-	if(puzles.size() == 0)
+	if(puzzles.size() == 0)
 	{
 		// Mostramos unmensaje de error.
-		cout << "<Error> No se ha cargado ningún puzle." << endl;
+		cout << "<Error>Juego::inicializaPuzzles - No se ha cargado ningún puzzle." << endl;
 
 		// Forzamos la salida.
 		exit(0);
@@ -360,7 +429,7 @@ void Juego::inicializaPuzzles()
 // Finaliza el juego.
 void Juego::finalizar()
 {
-	// Liberar los puzles.
+	// Liberar los puzzles.
 	finalizaPuzzles();
 
 	// Liberar los sonidos.
@@ -373,6 +442,9 @@ void Juego::finalizar()
 // Finaliza SDL.
 void Juego::finalizaSDL()
 {
+	// Liberamos las superficies.
+	superficies.clear();
+
 	// Liberar la memoria de SDL.
 	SDL_Quit();
 }
@@ -380,21 +452,22 @@ void Juego::finalizaSDL()
 // Finaliza el sonido.
 void Juego::finalizaSonido()
 {
-	// PENDIENTE
+	// Liberamos los sonidos.
+	sonidos.clear();
 }
 
-// Finaliza los puzles.
+// Finaliza los puzzles.
 void Juego::finalizaPuzzles()
 {
 	// Libera los puzzles.
-	list<Puzle*>::iterator pos = puzles.begin();
-	while( pos != puzles.end())
+	list<Puzzle*>::iterator pos = puzzles.begin();
+	while( pos != puzzles.end())
 	{
-		Puzle* puzle = *pos;
-		delete puzle;
+		Puzzle* puzzle = *pos;
+		delete puzzle;
 		pos++;
 	}
-	puzles.clear();
+	puzzles.clear();
 }
 
 //////////////////////////////////////////////
@@ -458,49 +531,7 @@ string Juego::formatoTiempo(Uint32 tiempo)
 	return msg;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Dibuja la barra de progreso para salir.
 void Juego::dibujarProgresoSalir()
 {
 	// Mostramos el tiempo restante para salir.
@@ -520,267 +551,21 @@ void Juego::dibujarProgresoSalir()
 			rectangulo.w = 100;
 			rectangulo.x = 650;
 			rectangulo.y = 15;
-			SDL_FillRect (SURFscreen, &rectangulo, SDL_MapRGB (SURFscreen->format, 0, 100, 0));
+			SDL_FillRect (superficies["screen"], &rectangulo, SDL_MapRGB (superficies["screen"]->format, 0, 100, 0));
 
 			// Superficie.
 			rectangulo.h = 20;
 			rectangulo.w = 100 * porcentajeCompletado;
 			rectangulo.x = 650;
 			rectangulo.y = 15;
-			SDL_FillRect (SURFscreen, &rectangulo, SDL_MapRGB (SURFscreen->format, 255, 0, 0));
+			SDL_FillRect (superficies["screen"], &rectangulo, SDL_MapRGB (superficies["screen"]->format, 255, 0, 0));
 
 			// Texto.
-			rectangulo.h = SURFsaliendo->h;
-			rectangulo.w = SURFsaliendo->w;
+			rectangulo.h = superficies["saliendo"]->h;
+			rectangulo.w = superficies["saliendo"]->w;
 			rectangulo.x = rectangulo.x+20;
 			rectangulo.y = rectangulo.y+2;
-			SDL_BlitSurface(SURFsaliendo, NULL, SURFscreen, &rectangulo);
+			SDL_BlitSurface(superficies["saliendo"], NULL, superficies["screen"], &rectangulo);
 		}
 	}
 }
-
-// Devuelve el mejor tiempo del puzle.
-Uint32 Juego::getMejorTiempo(string rutaPuzle)
-{
-	int leido = false;
-	Uint32 mejorTiempo = 0;
-
-	#ifdef WIN32
-
-	WIN32_FIND_DATA findFileData;
-	HANDLE hFind;
-
-	string rutaPuzleAux = rutaPuzle + "/*";
-	hFind = FindFirstFile(rutaPuzleAux.c_str(), &findFileData);
-
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			string nombre = string(findFileData.cFileName);
-			if(nombre == "estatisticas.txt")
-			{
-				leido = true;
-				ifstream fichero;
-				string ruta = rutaPuzle + "/" + nombre;
-				fichero.open(ruta.c_str(), ios::in);
-				if (fichero.is_open())
-				{
-					try
-					{
-						fichero >> mejorTiempo;
-					}
-					catch(...)
-					{
-						// El fichero no se puede leer.
-					}
-					fichero.close();
-				}
-				else
-				{
-					// El fichero no se puede leer.
-				}
-			}
-		}
-		while (FindNextFile(hFind, &findFileData) != 0 && leido == false);
-	}
-
-	#else
-
-	DIR* dp = NULL;
-	struct dirent* dirp = NULL;
-	// Abrimos el directorio.
-    if ((dp  = opendir(rutaPuzle.c_str())) != NULL)
-    {
-		// Leemos todas las entradas.
-		while ((dirp = readdir(dp)) != NULL && leido == false)
-		{
-			string nombre = string(dirp->d_name);
-			if(nombre=="estadisticas.txt")
-			{
-				leido = true;
-				ifstream fichero;
-				string ruta = rutaPuzle + "/" + nombre;
-				fichero.open(ruta.c_str(), ios::in);
-
-				if (fichero.is_open())
-				{
-					// Si podemos leer, es un fichero. Si no, es un directorio.
-					try
-					{
-						fichero >> mejorTiempo;
-					}
-					catch(...)
-					{
-						// El fichero no se puede leer.
-					}
-					fichero.close();
-				}
-			}
-		}
-
-		// Cerramos el directorio.
-		closedir(dp);
-	}
-
-	#endif
-
-	return mejorTiempo;
-}
-
-// Devuelve los mejores movimientos del puzle.
-int Juego::getMejorMovimiento(string rutaPuzle)
-{
-	int leido = false;
-	int mejorMovimiento = 0;
-
-	#ifdef WIN32
-
-	WIN32_FIND_DATA findFileData;
-	HANDLE hFind;
-
-	string rutaPuzleAux = rutaPuzle + "/*";
-	hFind = FindFirstFile(rutaPuzleAux.c_str(), &findFileData);
-
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			string nombre = string(findFileData.cFileName);
-			if(nombre == "estatisticas.txt")
-			{
-				leido = true;
-				ifstream fichero;
-				string ruta = rutaPuzle + "/" + nombre;
-				fichero.open(ruta.c_str(), ios::in);
-				if (fichero.is_open())
-				{
-					try
-					{
-						fichero >> mejorMovimiento;
-						fichero >> mejorMovimiento;
-					}
-					catch(...)
-					{
-						// El fichero no se puede leer.
-					}
-					fichero.close();
-				}
-				else
-				{
-					// El fichero no se puede leer.
-				}
-			}
-		}
-		while (FindNextFile(hFind, &findFileData) != 0 && leido == false);
-	}
-
-	#else
-
-	DIR* dp = NULL;
-	struct dirent* dirp = NULL;
-	// Abrimos el directorio.
-    if ((dp  = opendir(rutaPuzle.c_str())) != NULL)
-    {
-		// Leemos todas las entradas.
-		while ((dirp = readdir(dp)) != NULL && leido == false)
-		{
-			string nombre = string(dirp->d_name);
-			if(nombre=="estadisticas.txt")
-			{
-				leido = true;
-				ifstream fichero;
-				string ruta = rutaPuzle + "/" + nombre;
-				fichero.open(ruta.c_str(), ios::in);
-
-				if (fichero.is_open())
-				{
-					// Si podemos leer, es un fichero. Si no, es un directorio.
-					try
-					{
-						fichero >> mejorMovimiento;
-						fichero >> mejorMovimiento;
-					}
-					catch(...)
-					{
-						// El fichero no se puede leer.
-					}
-					fichero.close();
-				}
-			}
-		}
-
-		// Cerramos el directorio.
-		closedir(dp);
-	}
-
-	#endif
-
-	return mejorMovimiento;
-}
-
-void Juego::cargarPuzle(int tamano)
-{
-	// Seleccionamos el puzle actual.
-	list<Puzle*>::iterator pos = puzles.begin();
-	int explorandoPosicion = 0;
-	bool encontrado = false;
-	while( pos != puzles.end() && encontrado == false)
-	{
-		if(explorandoPosicion == numPuzleActual)
-		{
-			puzleActual = *pos;
-			encontrado = true;
-		}
-		pos++;
-		explorandoPosicion++;
-	}
-
-	if(encontrado == true)
-	{
-		// Dificultad facil.
-		puzleActual->setTamano(tamano);
-
-		// Removemos el puzle.
-		puzleActual->remover();
-
-		// Pasamos a jugar.
-		setEstado(Juego_EstadoJugando::getInstancia());
-
-		// Reproducimos el sonido.
-		reproducirSonido("remover");
-
-		// Obtenemos el mejor tiempo del puzle.
-		mejorTiempo = getMejorTiempo("puzles/"+puzleActual->getRuta());
-
-		// Obtenemos la mejor cantidad de movimientos del puzle.
-
-
-		// Iniciamos el contador de tiempo.
-		temporizadorJuego = SDL_GetTicks();
-
-		// Reiniciamos los movimientos.
-		contadorMovimientos = 0;
-	}
-	else
-	{
-		cout << "<Error>Juego::cargarPuzle - Puzle no encontrado.";
-		salir = true;
-	}
-}
-
-// Establece el valor del mejor tiempo.
-void Juego::setMejorTiempo(string ruta, Uint32 mejorTiempo)
-{
-
-}
-
-// Establece el valor del mejor movimiento.
-void Juego::setMejorMovimiento(string ruta, int mejorMovimiento)
-{
-
-}
-
-
-
-

@@ -37,6 +37,9 @@ private:
 	
 	// Constructor por defecto.
 	Juego_EstadoMenu();
+
+	// Comprueba si una coordenada se encuentra en un zona.
+	bool zona(int posicion_x, int posicion_y, int origen_x, int origen_y, int destino_x, int destino_y);
 };
 
 

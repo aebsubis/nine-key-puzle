@@ -5,10 +5,13 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>include/Directorio.h</itemPath>
+      <itemPath>include/Estado.h</itemPath>
       <itemPath>include/Juego.h</itemPath>
+      <itemPath>include/Juego_EstadoJugando.h</itemPath>
+      <itemPath>include/Juego_EstadoMenu.h</itemPath>
       <itemPath>include/Matriz.h</itemPath>
       <itemPath>include/Pieza.h</itemPath>
-      <itemPath>include/Puzle.h</itemPath>
+      <itemPath>include/Puzzle.h</itemPath>
       <itemPath>include/Sonido.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -20,8 +23,10 @@
                    projectFiles="true">
       <itemPath>src/Directorio.cpp</itemPath>
       <itemPath>src/Juego.cpp</itemPath>
+      <itemPath>src/Juego_EstadoJugando.cpp</itemPath>
+      <itemPath>src/Juego_EstadoMenu.cpp</itemPath>
       <itemPath>src/Pieza.cpp</itemPath>
-      <itemPath>src/Puzle.cpp</itemPath>
+      <itemPath>src/Puzzle.cpp</itemPath>
       <itemPath>src/Sonido.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>

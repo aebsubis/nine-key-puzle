@@ -1,8 +1,8 @@
-#include "Puzle.h"
+#include "Puzzle.h"
 #include <sstream>
 
 // Constructor por defecto.
-Puzle::Puzle()
+Puzzle::Puzzle()
 {
 	ruta = "";
 
@@ -11,21 +11,30 @@ Puzle::Puzle()
 	pequeno = NULL;
 	matriz = NULL;
 
+	// Tamaño del puzzle.
 	tamano = 0;
 
+	// Posición del hueco.
 	huecoX = 0;
 	huecoY = 0;
+
+	// Inicializamos los mejores tiempos y movimientos.
+	for(int i=0; i<10; i++)
+	{
+		mejorTiempo[i]= 3600000;
+		mejorMovimiento[i] = 999;
+	}
 }
 
 // Constructor sobrecargado.
-Puzle::Puzle(string ruta)
+Puzzle::Puzzle(string ruta)
 {
 	this->ruta = ruta;
 
 	// Cargamos las imágenes.
 	string rutaImagen = "";
 	
-	rutaImagen = "puzles/"+ruta+"/grande.jpg";
+	rutaImagen = "puzzles/"+ruta+"/grande.jpg";
 	grande = IMG_Load(rutaImagen.c_str());
 	if (grande == NULL)
 	{
@@ -33,7 +42,7 @@ Puzle::Puzle(string ruta)
 		exit(1);
 	};
 
-	rutaImagen = "puzles/"+ruta+"/medio.jpg";
+	rutaImagen = "puzzles/"+ruta+"/medio.jpg";
 	medio = IMG_Load(rutaImagen.c_str());
 	if (medio == NULL)
 	{
@@ -41,7 +50,7 @@ Puzle::Puzle(string ruta)
 		exit(1);
 	};
 
-	rutaImagen = "puzles/"+ruta+"/pequeno.jpg";
+	rutaImagen = "puzzles/"+ruta+"/pequeno.jpg";
 	pequeno = IMG_Load(rutaImagen.c_str());
 	if (pequeno == NULL)
 	{
@@ -49,29 +58,39 @@ Puzle::Puzle(string ruta)
 		exit(1);
 	};
 
+	// Matriz del puzzle.
 	matriz = NULL;
 
+	// Tamaño del puzzle.
 	tamano = 0;
 
+	// Posición del hueco.
 	huecoX = 0;
 	huecoY = 0;
+
+	// Inicializamos los mejores tiempos y movimientos.
+	for(int i=0; i<10; i++)
+	{
+		mejorTiempo[i]= 3600000;
+		mejorMovimiento[i] = 999;
+	}
 }
 
 // Constructor de copia.
-Puzle::Puzle(const Puzle& puzle)
+Puzzle::Puzzle(const Puzzle& puzzle)
 {
-	*this = puzle;
+	*this = puzzle;
 }
 
 // Operador de asignación.
-Puzle& Puzle::operator=(const Puzle& puzle)
+Puzzle& Puzzle::operator=(const Puzzle& puzzle)
 {
-	if (this != &puzle)
+	if (this != &puzzle)
 	{
 		// Cargamos las imágenes.
 		string rutaImagen = "";
 
-		rutaImagen = "puzles/"+ruta+"/grande.jpg";
+		rutaImagen = "puzzles/"+ruta+"/grande.jpg";
 		grande = IMG_Load(rutaImagen.c_str());
 		if (grande == NULL)
 		{
@@ -79,7 +98,7 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 			exit(1);
 		};
 
-		rutaImagen = "puzles/"+ruta+"/medio.jpg";
+		rutaImagen = "puzzles/"+ruta+"/medio.jpg";
 		medio = IMG_Load(rutaImagen.c_str());
 		if (medio == NULL)
 		{
@@ -87,7 +106,7 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 			exit(1);
 		};
 
-		rutaImagen = "puzles/"+ruta+"/pequeno.jpg";
+		rutaImagen = "puzzles/"+ruta+"/pequeno.jpg";
 		pequeno = IMG_Load(rutaImagen.c_str());
 		if (pequeno == NULL)
 		{
@@ -96,16 +115,16 @@ Puzle& Puzle::operator=(const Puzle& puzle)
 		};
 
 		// Copiamos el tamaño.
-		if(puzle.getTamano() > 0)
-			setTamano(puzle.getTamano());
+		if(puzzle.getTamano() > 0)
+			setTamano(puzzle.getTamano());
 		else
-			tamano = puzle.getTamano();
+			tamano = puzzle.getTamano();
 	}
 	return *this;
 }
 
 // Destructor.
-Puzle::~Puzle()
+Puzzle::~Puzzle()
 {
 	// Liberar memoria.
 	SDL_FreeSurface(grande);
@@ -114,47 +133,53 @@ Puzle::~Puzle()
 
 	if(matriz != NULL)
 		delete matriz;
+
+	// Liberamos los mejores movimientos.
+	mejorMovimiento.clear();
+
+	// Liberamos los mejores tiempos.
+	mejorTiempo.clear();
 }
 
 
 // Obtiene la rulta.
-string Puzle::getRuta() const
+string Puzzle::getRuta() const
 {
 	return ruta;
 }
 
 // Establece la ruta.
-void Puzle::setRuta(string ruta)
+void Puzzle::setRuta(string ruta)
 {
 	this->ruta = ruta;
 }
 
 // Devuelve la superficie de la imagen pequeña.
-SDL_Surface* Puzle::getPequeno() const
+SDL_Surface* Puzzle::getPequeno() const
 {
 	return pequeno;
 }
 
 // Devuelve la superficie de la imagen mediana.
-SDL_Surface* Puzle::getMedio() const
+SDL_Surface* Puzzle::getMedio() const
 {
 	return medio;
 }
 
 // Devuelve la superficie de la imagen grande.
-SDL_Surface* Puzle::getGrande() const
+SDL_Surface* Puzzle::getGrande() const
 {
 	return grande;
 }
 
-// Devuelve el tamaño del puzle.
-int Puzle::getTamano() const
+// Devuelve el tamaño del puzzle.
+int Puzzle::getTamano() const
 {
 	return tamano;
 }
 
-// Establece el tamaño del puzle.
-void Puzle::setTamano(int nuevoTamano)
+// Establece el tamaño del puzzle.
+void Puzzle::setTamano(int nuevoTamano)
 {
 	// Asignamos el nuevo tamaño.
 	tamano = nuevoTamano;
@@ -175,7 +200,7 @@ void Puzle::setTamano(int nuevoTamano)
 }
 
 // Remueve las fichas.
-void Puzle::remover()
+void Puzzle::remover()
 {
 	string direccion = "";
 	int numIntercambios = tamano*50;
@@ -199,22 +224,13 @@ void Puzle::remover()
 		}
 		
 		mover(direccion);
-
-		/*
-		int posx1 = rand()%tamano;
-		int posy1 = rand()%tamano;
-		int posx2 = rand()%tamano;
-		int posy2 = rand()%tamano;
-
-		intercambiar(posx1, posy1, posx2, posy2);
-		*/
 	}
 }
 
-// Soluciona el puzle.
-void Puzle::solucionar()
+// Soluciona el puzzle.
+void Puzzle::solucionar()
 {
-	// Puzle solucionado
+	// Puzzle solucionado
 	for(int i=0; i<tamano; i++)
 	{
 		for(int j=0; j<tamano; j++)
@@ -225,10 +241,10 @@ void Puzle::solucionar()
 	}
 }
 
-// Indica si el puzle está solucionado.
-bool Puzle::solucionado() const
+// Indica si el puzzle está solucionado.
+bool Puzzle::solucionado() const
 {
-	// Puzle solucionado
+	// Puzzle solucionado
 	bool solucionado = true;
 	for(int i=0; i<tamano && solucionado == true; i++)
 	{
@@ -243,7 +259,7 @@ bool Puzle::solucionado() const
 }
 
 // Intercambia dos piezas.
-void Puzle::intercambiar(int posx1, int posy1, int posx2, int posy2)
+void Puzzle::intercambiar(int posx1, int posy1, int posx2, int posy2)
 {
 	Pieza pieza1 = matriz->getElemento(posx1, posy1);
 	Pieza pieza2 = matriz->getElemento(posx2, posy2);
@@ -265,7 +281,7 @@ void Puzle::intercambiar(int posx1, int posy1, int posx2, int posy2)
 }
 
 // Mueve el hueco en la dirección indicada.
-bool Puzle::mover(string direccion)
+bool Puzzle::mover(string direccion)
 {
 	if(direccion == "arriba")
 	{
@@ -301,7 +317,43 @@ bool Puzle::mover(string direccion)
 	}
 	else
 	{
-		cout << "<Error>Puzle:mover - Dirección no permitida.";
+		cout << "<Error>Puzzle:mover - Dirección no permitida.";
 	}
 	return false;
+}
+
+// Devuelve el mejor tiempo del nivel actual.
+Uint32 Puzzle::getMejorTiempo()
+{
+	return mejorTiempo[getTamano()];
+}
+
+// Establece el mejor tiempo del nivel actual.
+void Puzzle::setMejorTiempo(Uint32 mejorTiempo)
+{
+	this->mejorTiempo[getTamano()] = mejorTiempo;
+}
+
+// Devuelve la mejor cantidad de movimientos del nivel actual.
+int Puzzle::getMejorMovimiento()
+{
+	return mejorMovimiento[getTamano()];
+}
+
+// Establece la mejor cantidad de movimientos del nivel actual.
+void Puzzle::setMejorMovimiento(int mejorMovimiento)
+{
+	this->mejorMovimiento[getTamano()] = mejorMovimiento;
+}
+
+// Carga las estadísticas del puzzle desde el fichero de texto.
+void Puzzle::cargarEstadisticas()
+{
+
+}
+
+// Guarda las estadísticas del puzzle en el fichero de texto.
+void Puzzle::guardarEstadisticas()
+{
+
 }

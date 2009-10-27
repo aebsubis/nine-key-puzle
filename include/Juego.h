@@ -13,7 +13,7 @@
 #include "SDL/SDL_image.h"
 
 
-#include "Puzle.h"
+#include "Puzzle.h"
 #include "Sonido.h"
 #include "Directorio.h"
 
@@ -61,17 +61,29 @@ public:
 	// Finaliza el juego.
 	void finalizar();
 
-	// Establece como puzle actual el puzle anterior.
+	// Establece como puzzle actual el puzzle anterior.
 	void puzzleAnterior();
 
-	// Establece como puzle actual el puzzle siguiente.
+	// Establece como puzzle actual el puzzle siguiente.
 	void puzzleSiguiente();
 
 	// Indica si se debe salir.
-	bool getSalir();
+	bool getSalir() const;
 
 	// Establece si se debe salir.
 	void setSalir(bool salir);
+
+	// Devuelve la superficie.
+	SDL_Surface* getSuperficie(string nombre);
+
+	// Establece la superficie.
+	void setSuperficie(string nombre, SDL_Surface* superficie);
+
+	// Devuelve la fuente.
+	TTF_Font* getFuente() const;
+
+	// Establece la fuente.
+	void setFuente(TTF_Font* fuente);
 
 private:
 
@@ -81,13 +93,16 @@ private:
 	// Reproduce el sonido que recibe por parámetro.
 	void reproducirSonido(string sonido);
 
+	// Carga el puzzle actual con el tamaño indicado.
+	void cargarPuzzle(int tamano);
+
 	// Inicializa SDL.
 	void inicializaSDL();
 
 	// Inicializa el sonido.
 	void inicializaSonido();
 	
-	// Inicializa los puzles.
+	// Inicializa los puzzles.
 	void inicializaPuzzles();
 	
 	// Finaliza SDL.
@@ -96,13 +111,14 @@ private:
 	// Finaliza el sonido.
 	void finalizaSonido();
 
-	// Finaliza los puzles.
+	// Finaliza los puzzles.
 	void finalizaPuzzles();
 
 	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
 	string formatoTiempo(Uint32 tiempo);
 
-
+	// Dibuja la barra de progreso para salir
+	void dibujarProgresoSalir();
 
 	/// Instancia de la clase
 	static Juego* instancia;
@@ -110,100 +126,37 @@ private:
 	// Indica el estado actual del juego.
 	Estado<Juego>* estado;
 
-	// Listado de puzles disponibles.
-	list<Puzle*> puzles;
+	// Listado de puzzles disponibles.
+	list<Puzzle*> puzzles;
 
-	// Puzle que se está jugando.
-	Puzle* puzleActual;
+	// Puzzle que se está jugando.
+	Puzzle* puzzleActual;
 
-	// Número de puzle que se va a jugar o se está jugando.
-	int numPuzleActual;
+	// Número de puzzle que se va a jugar o se está jugando.
+	int numPuzzleActual;
 
+	// Mapa de superficies.
+	map<string, SDL_Surface*> superficies;
+	
 	// Mapa de sonidos.
 	map<string, Sonido*> sonidos;
 
 	// Indica si se debe salir.
 	bool salir;
 
-
-
-
-
-
-
-
-
-
-
-
-
-	// Dibuja la barra de progreso para salir
-	void dibujarProgresoSalir();	
-
-	// Devuelve el mejor tiempo del puzle.
-	Uint32 getMejorTiempo(string rutaPuzle);
-
-	// Devuelve los mejores movimientos del puzle.
-	int getMejorMovimiento(string rutaPuzle);
-
-	// Establece el valor del mejor tiempo.
-	void setMejorTiempo(string ruta, Uint32 mejorTiempo);
-
-	// Establece el valor del mejor movimiento.
-	void setMejorMovimiento(string ruta, int mejorMovimiento);
-
-	// Carga el puzle actual con el tamaño indicado.
-	void cargarPuzle(int tamano);
-
-	
-
-
-
-
-
-	// Pantalla sobre la que se dibuja.
-	SDL_Surface *SURFscreen;
-
-	// Imagen de fondo.
-	SDL_Surface *SURFfondo;
-
-	// Imagen de fondo2.
-	SDL_Surface *SURFfondo2;
-
-	// Superficie de juego.
-	SDL_Surface *SURFjuego;
-
-	// Texto saliendo.
-	SDL_Surface *SURFsaliendo;
-
-	// Texto completado.
-	SDL_Surface *SURFcompletado;
-
-	// Animación del reloj.
-	SDL_Surface *SURFreloj;
-
-	// Superficie de tiempo.
-	SDL_Surface *SURFtexto;
-
-	// Fuente utilizada.
+	// Fuente del texto.
 	TTF_Font* FONTfuente;
 	
-	
-
 	// Contadores.
 	Uint32 temporizadorEscape;
 	Uint32 iteracionAnterior;
 	Uint32 temporizadorReloj;
-	Uint32 temporizadorJuego;
-
+	
+	// Contador del tiempo transcurrido.
+	Uint32 contadorTiempo;
+	
 	// Contabiliza los movimientos realizados.
 	int contadorMovimientos;
-
-	// Mejor número de movimientos del puzle.
-	int mejorMovimiento;
-
-	// Mejor tiempo del puzle.
-	Uint32 mejorTiempo;
 
 	// Frame de la animación del reloj.
 	int frameAnimacionReloj;
