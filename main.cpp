@@ -9,7 +9,13 @@ using namespace std;
  */
 int main(int argc, char** argv)
 {
+	// Creamos el juego.
 	Juego* juego = Juego::getInstancia();
+	
+	// Iniciamos.
 	juego->iniciar();
+
+	// liberamos.
+	delete juego;
 }
 

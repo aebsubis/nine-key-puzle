@@ -27,7 +27,7 @@ Juego::~Juego()
 		// Finaliza el juego y libera toda la memoria.
 		finalizar();
 
-		delete instancia;
+		// Instancia nula.
 		instancia = NULL;
 	}
 }
@@ -402,8 +402,13 @@ void Juego::inicializaPuzzles()
 		string ruta = *pos;
 		if(ruta[0] != '.')
 		{
-			// Añadimos el puzzle.
+			// Creamos un nuevo puzzle.
 			Puzzle* puzzle = new Puzzle(ruta);
+			
+			// Cargamos las estadísticas.
+			puzzle->cargarEstadisticas();
+
+			// Lo añadimos a la lista de puzzles.
 			puzzles.push_front(puzzle);
 		}
 		pos++;
@@ -436,7 +441,7 @@ void Juego::finalizar()
 	finalizaSonido();
 
 	// Liberar SDL.
-	finalizaSDL();
+	//finalizaSDL();
 }
 
 // Finaliza SDL.
@@ -463,8 +468,15 @@ void Juego::finalizaPuzzles()
 	list<Puzzle*>::iterator pos = puzzles.begin();
 	while( pos != puzzles.end())
 	{
+		// Obtenemos el puzzle.
 		Puzzle* puzzle = *pos;
+
+		// Guardamos las estadísticas.
+		puzzle->guardarEstadisticas();
+
+		// Liberamos la memoria.
 		delete puzzle;
+
 		pos++;
 	}
 	puzzles.clear();

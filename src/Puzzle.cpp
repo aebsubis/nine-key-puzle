@@ -1,5 +1,6 @@
 #include "Puzzle.h"
 #include <sstream>
+#include <fstream>
 
 // Constructor por defecto.
 Puzzle::Puzzle()
@@ -349,11 +350,78 @@ void Puzzle::setMejorMovimiento(int mejorMovimiento)
 // Carga las estadísticas del puzzle desde el fichero de texto.
 void Puzzle::cargarEstadisticas()
 {
+	if(ruta!="")
+	{
+		// Stream del fichero
+		ifstream f;
 
+		// Ruta del fichero.
+		string fichero = "puzzles/"+ruta+"/estadisticas.txt";
+
+		// Abrimos el fichero.
+		f.open(fichero.c_str(),ios::in);
+		if( f.is_open() )
+		{
+			// Leemos las estadísticas.
+			for(int i=0; i<10; i++)
+			{
+				// Leemos el mejor tiempo.
+				Uint32 tiempo = 0;
+				f >> tiempo;
+
+				// Guardamos el mejor tiempo.
+				mejorTiempo[i]= tiempo;
+
+				// Leemos el mejor movimiento.
+				int movimiento = 0;
+				f >> movimiento;
+
+				// Guardamos el mejor movimiento.
+				mejorMovimiento[i] = movimiento;
+			}
+			
+			// Cerramos el fichero.
+			f.close();
+		}
+	}
 }
 
 // Guarda las estadísticas del puzzle en el fichero de texto.
 void Puzzle::guardarEstadisticas()
 {
+	if(ruta!="")
+	{
+		// Stream del fichero
+		ofstream f;
 
+		// Ruta del fichero.
+		string fichero = "puzzles/"+ruta+"/estadisticas.txt";
+
+		// Abrimos el fichero.
+		f.open(fichero.c_str(),ios::out);
+		if( f.is_open() )
+		{
+			// Escribimos las estadísticas.
+			for(int i=0; i<10; i++)
+			{
+				// Escribimos el mejor tiempo.
+				Uint32 tiempo = mejorTiempo[i];
+				f << tiempo;
+
+				// Espacio
+				char espacio = ' ';
+				f << espacio;
+				
+				// Escribimos el mejor movimiento.
+				int movimiento = mejorMovimiento[i];
+				f << movimiento;
+
+				// Salto de línea.
+				f << endl;
+			}
+
+			// Cerramos el fichero.
+			f.close();
+		}
+	}
 }
