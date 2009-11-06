@@ -43,6 +43,11 @@ SDL_Event event;
 				// Al pulsar el escape pasamos al estado menú sin esperar.
 				juego->setEstado(Juego_EstadoMenu::getInstancia());
 			}
+			else if (event.key.keysym.sym == SDLK_q)
+			{
+				// Efectúa un movimiento con el algoritmo irrevocable.
+				juego->resolverIrrevocable();
+			}
 		}
 		else if (event.type == SDL_KEYUP)
 		{
@@ -217,12 +222,12 @@ SDL_Event event;
 			else if(event.button.button == SDL_BUTTON_WHEELUP)
 			{
 				// Elegimos el puzzle de abajo.
-				juego->puzzleAnterior();
+				//juego->puzzleAnterior();
 			}
 			else if(event.button.button == SDL_BUTTON_WHEELDOWN)
 			{
 				// Elegimos el puzzle de arriba.
-				juego->puzzleSiguiente();
+				//juego->puzzleSiguiente();
 			}
 		}
 		else if(event.type == SDL_QUIT)

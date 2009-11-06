@@ -1,6 +1,5 @@
-#include <sstream>
-#include <SDL/SDL_video.h>
 #include <SDL/SDL_keysym.h>
+#include <sstream>
 #include "Juego.h"
 
 // Instancia de la clase.
@@ -151,6 +150,13 @@ Juego::Juego()
 
 	// Tiempo de delay.
 	delay = 0;
+	delayNivel = 0;
+
+	// Nivel por defecto.
+	nivel = 3;
+
+	// Se dibujan los niveles.
+	dibujarNiveles = false;
 
 	// Inicializamos la semilla del rand.
 	srand(time(NULL));
@@ -238,6 +244,18 @@ void Juego::setSalir(bool salir)
 	this->salir = salir;
 }
 
+// Indica el nivel actual.
+int Juego::getNivel() const
+{
+	return nivel;
+}
+
+// Establece el nivel actual.
+void Juego::setNivel(int nivel)
+{
+	this->nivel = nivel;
+}
+
 // Devuelve la superficie.
 SDL_Surface* Juego::getSuperficie(string nombre)
 {
@@ -299,9 +317,6 @@ void Juego::inicializaSDL()
 		exit (1);
 	}
 
-	// Establecemos un nombre y un icono para la ventana creada.
-	SDL_WM_SetCaption ((char *) "Nine-Key Puzzle", (char *) "Nine-Key Puzzle");
-
 	// Inicializamos las superficies.
 	superficies["screen"] = NULL;
 	superficies["fondoMenu"] = NULL;
@@ -309,6 +324,14 @@ void Juego::inicializaSDL()
 	superficies["saliendo"] = NULL;
 	superficies["completado"] = NULL;
 	superficies["reloj"] = NULL;
+	superficies["panelNivel"] = NULL;
+	for(int i=0; i<8; i++)
+	{
+		stringstream nivel;
+		nivel << i+2;
+		superficies["nivel" + nivel.str()] = NULL;
+		superficies["nivel" + nivel.str() + "on"] = NULL;
+	}
 	
 	// Activamos el modo de vídeo.
 	superficies["screen"] = SDL_SetVideoMode (800, 600, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
@@ -317,6 +340,9 @@ void Juego::inicializaSDL()
 		printf ("No se puede inicializar el modo gráfico: %s\n", SDL_GetError ());
 		exit (1);
 	}
+
+	// Establecemos un nombre y un icono para la ventana creada.
+	SDL_WM_SetCaption ((char *) "Nine-Key Puzzle", (char *) "Nine-Key Puzzle");
 
 	// Cargamos la imagen de fondo.
 	superficies["fondoMenu"] = IMG_Load("data/fondo.jpg");
@@ -338,7 +364,7 @@ void Juego::inicializaSDL()
 	superficies["completado"] = IMG_Load("data/completado.png");
 	if (superficies["completado"] == NULL)
 	{
-		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	}
 
@@ -346,14 +372,48 @@ void Juego::inicializaSDL()
 	superficies["reloj"] = IMG_Load("data/reloj.jpg");
 	if (superficies["reloj"] == NULL)
 	{
-		printf("No se pudi cargar gráfico: %s\n", SDL_GetError());
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
+	}
+
+	// Cargamos la imagen del NIVEL.
+	superficies["panelNivel"] = IMG_Load("data/nivel.png");
+	if (superficies["panelNivel"] == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	for(int i=0; i<8; i++)
+	{
+		stringstream nivel;
+		nivel << i+2;
+
+		string ruta = "";
+		
+		// Cargamos la imagen del botón.
+		ruta = "data/" + nivel.str() + ".png";
+		superficies["nivel" + nivel.str()] = IMG_Load(ruta.c_str());
+		if (superficies["nivel" + nivel.str()] == NULL)
+		{
+			printf("No pude cargar gráfico: %s\n", SDL_GetError());
+			exit(1);
+		}
+
+		// Cargamos la imagen del activo.
+		ruta = "data/" + nivel.str() + "on.png";
+		superficies["nivel" + nivel.str() + "on"] = IMG_Load(ruta.c_str());
+		if (superficies["nivel" + nivel.str() + "on"] == NULL)
+		{
+			printf("No pude cargar gráfico: %s\n", SDL_GetError());
+			exit(1);
+		}
 	}
 
 	// Inicializamos SDL_ttf
 	if (TTF_Init() < 0)
 	{
-		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
+		printf("No pude iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
 
@@ -361,7 +421,7 @@ void Juego::inicializaSDL()
 	FONTfuente = TTF_OpenFont("data/dejavu.ttf",12);
 	if (FONTfuente == NULL)
 	{
-		printf("No se pudo iniciar SDL_ttf: %s\n",SDL_GetError());
+		printf("No pude iniciar SDL_ttf: %s\n",SDL_GetError());
 		exit(1);
 	}
 
@@ -580,4 +640,109 @@ void Juego::dibujarProgresoSalir()
 			SDL_BlitSurface(superficies["saliendo"], NULL, superficies["screen"], &rectangulo);
 		}
 	}
+}
+
+//////////////////////////////////////////////
+//////////// FUNCIONES AUXILIARES ////////////
+//////////////////////////////////////////////
+
+// Resuelve el puzle mediante un algoritmo irrevocable.
+void Juego::resolverIrrevocable()
+{
+
+	// Comprobamos que exista un puzzle actual.
+	if(puzzleActual == NULL)
+	{
+		// Mostramos el mensaje de error.
+		cout << "<Error>Juego::resolverIrevocable - estadoActual == NULL." << endl;
+
+		// Forzamos la salida.
+		exit(1);
+	}
+
+	if(puzzleActual->solucionado() == false)
+	{
+		// Valor mínimo de elección.
+		int fMinimo = 10;
+
+		// movimiento decidido.
+		string movimientoSiguiente = "";
+		
+		Puzzle* puzzleDerecha = new Puzzle(*puzzleActual);
+		if(puzzleDerecha->mover("derecha") == true)
+		{
+			if(puzzleDerecha->getF() < fMinimo)
+			{
+				// El siguiente movimiento es derecha.
+				movimientoSiguiente = "derecha";
+
+				// Guardamos el nuevo valor mínimo.
+				fMinimo = puzzleDerecha->getF();
+			}
+		}
+
+		Puzzle* puzzleIzquierda = new Puzzle(*puzzleActual);
+		if(puzzleIzquierda->mover("izquierda") == true)
+		{
+			if(puzzleIzquierda->getF() < fMinimo)
+			{
+				// El siguiente movimiento es izquierda.
+				movimientoSiguiente = "izquierda";
+
+				// Guardamos el nuevo valor mínimo.
+				fMinimo = puzzleIzquierda->getF();
+			}
+		}
+
+		Puzzle* puzzleArriba = new Puzzle(*puzzleActual);
+		if(puzzleArriba->mover("arriba") == true)
+		{
+			if(puzzleArriba->getF() < fMinimo)
+			{
+				// El siguiente movimiento es arriba.
+				movimientoSiguiente = "arriba";
+
+				// Guardamos el nuevo valor mínimo.
+				fMinimo = puzzleArriba->getF();
+			}
+		}
+
+		Puzzle* puzzleAbajo = new Puzzle(*puzzleActual);
+		if(puzzleAbajo->mover("abajo") == true)
+		{
+			if(puzzleAbajo->getF() < fMinimo)
+			{
+				// El siguiente movimiento es abajo.
+				movimientoSiguiente = "abajo";
+
+				// Guardamos el nuevo valor mínimo.
+				fMinimo = puzzleAbajo->getF();
+			}
+		}
+
+		// Comprobamos que se haya elegido un movimiento.
+		if(movimientoSiguiente == "")
+		{
+			// Mostramos el mensaje de error.
+			cout << "<Error>Juego::resolverIrevocable - No se ha elegido ningún movimiento." << endl;
+
+			// Forzamos la salida.
+			exit(1);
+		}
+
+		// Liberar memoria.
+		delete puzzleDerecha;
+		delete puzzleIzquierda;
+		delete puzzleArriba;
+		delete puzzleAbajo;
+
+		// Realizamos el movimiento.
+		puzzleActual->mover(movimientoSiguiente);
+	}
+}
+
+// Resuelve el puzle mediante un algoritmo tentativo.
+void Juego::resolverTentativo()
+{
+
 }

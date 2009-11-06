@@ -1,5 +1,4 @@
 #include "Puzzle.h"
-#include <sstream>
 #include <fstream>
 
 // Constructor por defecto.
@@ -80,6 +79,10 @@ Puzzle::Puzzle(string ruta)
 // Constructor de copia.
 Puzzle::Puzzle(const Puzzle& puzzle)
 {
+	grande = NULL;
+	medio = NULL;
+	pequeno = NULL;
+	matriz = NULL;
 	*this = puzzle;
 }
 
@@ -88,7 +91,11 @@ Puzzle& Puzzle::operator=(const Puzzle& puzzle)
 {
 	if (this != &puzzle)
 	{
+		// Copiamos la ruta.
+		ruta = puzzle.ruta;
+		
 		// Cargamos las imágenes.
+		/*
 		string rutaImagen = "";
 
 		rutaImagen = "puzzles/"+ruta+"/grande.jpg";
@@ -114,12 +121,24 @@ Puzzle& Puzzle::operator=(const Puzzle& puzzle)
 			printf("No pude cargar gráfico: %s\n", SDL_GetError());
 			exit(1);
 		};
-
+		*/
 		// Copiamos el tamaño.
-		if(puzzle.getTamano() > 0)
-			setTamano(puzzle.getTamano());
-		else
-			tamano = puzzle.getTamano();
+		setTamano(puzzle.getTamano());
+
+		// Copiamos la matriz.
+		// Puzzle solucionado
+		for(int i=0; i<tamano; i++)
+		{
+			for(int j=0; j<tamano; j++)
+			{
+				matriz->getPunteroElemento(i,j)->setX(puzzle.matriz->getPunteroElemento(i,j)->getX());
+				matriz->getPunteroElemento(i,j)->setY(puzzle.matriz->getPunteroElemento(i,j)->getY());
+			}
+		}
+
+		huecoX = puzzle.huecoX;
+		huecoY = puzzle.huecoY;
+		
 	}
 	return *this;
 }
@@ -203,29 +222,41 @@ void Puzzle::setTamano(int nuevoTamano)
 // Remueve las fichas.
 void Puzzle::remover()
 {
+	// Indica la dirección del movimiento.
 	string direccion = "";
-	int numIntercambios = tamano*50;
-	for(int i=0; i<numIntercambios; i++ )
-	{
-		int dirAleatoria = rand()%4;
-		switch(dirAleatoria)
+
+	// Número de intento de remover.
+	int intentoRemover = 1;
+
+	do{
+
+		// Removemos el puzzle.
+		int numIntercambios = tamano*tamano*50/intentoRemover;
+		for(int i=0; i<numIntercambios; i++ )
 		{
-			case 0:
-				direccion = "derecha";
-				break;
-			case 1:
-				direccion = "izquierda";
-				break;
-			case 2:
-				direccion = "arriba";
-				break;
-			case 3:
-				direccion = "abajo";
-				break;
+			int dirAleatoria = rand()%4;
+			switch(dirAleatoria)
+			{
+				case 0:
+					direccion = "derecha";
+					break;
+				case 1:
+					direccion = "izquierda";
+					break;
+				case 2:
+					direccion = "arriba";
+					break;
+				case 3:
+					direccion = "abajo";
+					break;
+			}
+
+			mover(direccion);
 		}
-		
-		mover(direccion);
-	}
+		// Incrementamos los intentos de remover el puzzle.
+		intentoRemover++;
+
+	}while(solucionado());
 }
 
 // Soluciona el puzzle.
@@ -251,7 +282,7 @@ bool Puzzle::solucionado() const
 	{
 		for(int j=0; j<tamano && solucionado == true; j++)
 		{
-			if( (matriz->getElemento(i,j).getX() != i) || (matriz->getElemento(i,j).getY() !=j) )
+			if( (matriz->getElemento(i,j).getX() != i) || (matriz->getElemento(i,j).getY() != j) )
 				solucionado = false;
 		}
 	}
@@ -424,4 +455,21 @@ void Puzzle::guardarEstadisticas()
 			f.close();
 		}
 	}
+}
+
+// Devuelve el falor de f del puzzle.
+int Puzzle::getF()
+{
+	// Número de piezas mal colocadas.
+	int piezasMal = 0;
+	for(int i=0; i<tamano; i++)
+	{
+		for(int j=0; j<tamano; j++)
+		{
+			if( (matriz->getElemento(i,j).getX() != i) || (matriz->getElemento(i,j).getY() != j) )
+				piezasMal++;
+		}
+	}
+
+	return piezasMal;
 }

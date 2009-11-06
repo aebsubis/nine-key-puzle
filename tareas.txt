@@ -1,0 +1,9 @@
+Internacionalizar.
+Algoritmo resuelve A*.
+Historial.
+Arrastrar fichas.
+Botón entrar, salir.
+Compilar en windows.
+Activar/Desactivar sonido.
+Arreglar sonido fondo.
+Arreglar título.

@@ -1,5 +1,5 @@
 #include <SDL/SDL_events.h>
-
+#include <sstream>
 #include "Juego_EstadoMenu.h"
 
 // Instancia de la clase.
@@ -58,45 +58,64 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 		}
 		else if (event.type == SDL_KEYUP) // Se ha soltado una tecla
 		{
-			if (event.key.keysym.sym == SDLK_2)
+			if (event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_LEFT)
 			{
-				// Carga el puzzleActual a tamaño 2x2.
-				juego->cargarPuzzle(2);
+				// Decrementamos el nivel.
+				int nivel = juego->getNivel()-1;
+				if(nivel > 1)
+					juego->setNivel(nivel);
 			}
-			else if (event.key.keysym.sym == SDLK_3 || event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_RIGHT)
+			else if (event.key.keysym.sym == SDLK_KP6 || event.key.keysym.sym == SDLK_RIGHT)
 			{
-				// Carga el puzzleActual a tamaño 3x3.
-				juego->cargarPuzzle(3);
+				// Incrementamos el nivel.
+				int nivel = juego->getNivel()+1;
+				if(nivel < 10)
+					juego->setNivel(nivel);
 			}
-			else if (event.key.keysym.sym == SDLK_4 || event.key.keysym.sym == SDLK_KP5)
+			else if (event.key.keysym.sym == SDLK_2)
 			{
-				// Carga el puzzleActual a tamaño 4x4.
-				juego->cargarPuzzle(4);
+				// Establecemos el nivel a 2x2.
+				juego->setNivel(2);
 			}
-			else if (event.key.keysym.sym == SDLK_5 || event.key.keysym.sym == SDLK_KP6)
+			else if (event.key.keysym.sym == SDLK_3)
 			{
-				// Carga el puzzleActual a tamaño 4x4.
-				juego->cargarPuzzle(5);
+				// Establecemos el nivel a 3x3.
+				juego->setNivel(3);
+			}
+			else if (event.key.keysym.sym == SDLK_4)
+			{
+				// Establecemos el nivel a 4x4.
+				juego->setNivel(4);
+			}
+			else if (event.key.keysym.sym == SDLK_5)
+			{
+				// Establecemos el nivel a 5x5.
+				juego->setNivel(5);
 			}
 			else if (event.key.keysym.sym == SDLK_6)
 			{
-				// Carga el puzzleActual a tamaño 6x6.
-				juego->cargarPuzzle(6);
+				// Establecemos el nivel a 6x6.
+				juego->setNivel(6);
 			}
 			else if (event.key.keysym.sym == SDLK_7)
 			{
-				// Carga el puzzleActual a tamaño 7x7.
-				juego->cargarPuzzle(7);
+				// Establecemos el nivel a 7x7.
+				juego->setNivel(7);
 			}
 			else if (event.key.keysym.sym == SDLK_8)
 			{
-				// Carga el puzzleActual a tamaño 8x8.
-				juego->cargarPuzzle(8);
+				// Establecemos el nivel a 8x8.
+				juego->setNivel(8);
 			}
-			else if( event.key.keysym.sym == SDLK_9)
+			else if (event.key.keysym.sym == SDLK_9)
 			{
-				// Carga el puzzleActual a tamaño 9x9.
-				juego->cargarPuzzle(9);
+				// Establecemos el nivel a 9x9.
+				juego->setNivel(9);
+			}
+			else if (event.key.keysym.sym == SDLK_KP_ENTER || event.key.keysym.sym == SDLK_RETURN || event.key.keysym.sym == SDLK_KP5)
+			{
+				// Carga el puzzleActual al nivel actual.
+				juego->cargarPuzzle(juego->getNivel());
 			}
 			else if (event.key.keysym.sym == SDLK_KP9)
 			{
@@ -131,14 +150,87 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 				}
 				else if(zona(mouse_x, mouse_y, 0, 240, 240, 360))
 				{
-					// Carga el puzzleActual a tamaño 3x3.
-					juego->cargarPuzzle(3);
+					// Carga el puzzleActual al nivel actual.
+					juego->cargarPuzzle(juego->getNivel());
 				}
 				else if(zona(mouse_x, mouse_y, 0, 360, 240, 600))
 				{
 					// Elegimos el puzzle de abajo.
 					juego->puzzleAnterior();
 				}
+				
+
+				if(juego->dibujarNiveles == true)
+				{
+					if(zona(mouse_x, mouse_y, 250, 50, 750, 505))
+					{
+						// Carga el puzzleActual al nivel actual.
+						juego->cargarPuzzle(juego->getNivel());
+					}
+					else if(zona(mouse_x, mouse_y, 275, 510, 300, 600))
+					{
+						// Desactivamos el dibujado de los niveles.
+						juego->dibujarNiveles = false;
+						juego->delayNivel = 500;
+					}
+
+					else if(zona(mouse_x, mouse_y, 322, 523, 424, 553))
+					{
+						// Establecemos el nivel 2.
+						juego->setNivel(2);
+					}
+					else if(zona(mouse_x, mouse_y, 437, 523, 539, 553))
+					{
+						// Establecemos el nivel 3.
+						juego->setNivel(3);
+					}
+					else if(zona(mouse_x, mouse_y, 552, 523, 654, 553))
+					{
+						// Establecemos el nivel 4.
+						juego->setNivel(4);
+					}
+					else if(zona(mouse_x, mouse_y, 667, 523, 769, 553))
+					{
+						// Establecemos el nivel 5.
+						juego->setNivel(5);
+					}
+					else if(zona(mouse_x, mouse_y, 322, 563, 424, 593))
+					{
+						// Establecemos el nivel 6.
+						juego->setNivel(6);
+					}
+					else if(zona(mouse_x, mouse_y, 437, 563, 539, 593))
+					{
+						// Establecemos el nivel 7.
+						juego->setNivel(7);
+					}
+					else if(zona(mouse_x, mouse_y, 552, 563, 654, 593))
+					{
+						// Establecemos el nivel 8.
+						juego->setNivel(8);
+					}
+					else if(zona(mouse_x, mouse_y, 667, 563, 769, 593))
+					{
+						// Establecemos el nivel 9.
+						juego->setNivel(9);
+					}
+				}
+				else
+				{
+					if(zona(mouse_x, mouse_y, 250, 50, 750, 555))
+					{
+						// Carga el puzzleActual al nivel actual.
+						juego->cargarPuzzle(juego->getNivel());
+					}
+					else if(zona(mouse_x, mouse_y, 775, 510, 800, 600))
+					{
+						// Actuvamos el dibujado de los niveles.
+						juego->dibujarNiveles = true;
+						juego->delayNivel = 500;
+					}
+				}
+
+				cout << "(" << mouse_x << "," << mouse_y << ")" << endl;
 			}
 			else if(event.button.button == SDL_BUTTON_RIGHT)
 			{
@@ -169,6 +261,18 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 // Actualiza el menú.
 void Juego_EstadoMenu::actualizar(Juego* juego)
 {
+	// Decrementamos el delay hasta 0.
+	if(juego->delay>0)
+		juego->delay = juego->delay - 10;
+	if(juego->delay<0)
+		juego->delay = juego->delay + 10;
+
+	// Decrementamos el delayNivel hasta 0.
+	if(juego->delayNivel>0)
+		juego->delayNivel = juego->delayNivel - 25;
+	if(juego->delayNivel<0)
+		juego->delayNivel = juego->delayNivel + 25;
+
 	// Comprobamos si la tecla de forzar salida lleva pulsada suficiente tiempo
 	if(juego->temporizadorEscape != 0)
 	{
@@ -286,14 +390,44 @@ void Juego_EstadoMenu::render(Juego* juego)
 				pos = juego->puzzles.begin();
 			}
 		}
-
 	}
 
-	// Decrementamos el delay hasta 0.
-	if(juego->delay>0)
-		juego->delay = juego->delay - 10;
-	if(juego->delay<0)
-		juego->delay = juego->delay + 10;
+
+	// Dibujamos el panel de niveles.
+	SDL_Rect posicionPanel;
+	if(juego->dibujarNiveles == true)
+	{
+		// El panel se está mostrando.
+		posicionPanel.x = 270 + juego->delayNivel;
+		posicionPanel.y = 505;
+	}
+	else
+	{
+		// El panel se está ocultando.
+		posicionPanel.x = 770 - juego->delayNivel;
+		posicionPanel.y = 505;
+
+	}
+	SDL_BlitSurface(juego->getSuperficie("panelNivel"), NULL, juego->getSuperficie("screen"), &posicionPanel);
+
+	// Dibujamos los botones.
+	for(int i=0; i<8; i++)
+	{
+		// Calculamos la posición del boton.
+		int fila = i/4;
+		int columna = i%4;
+		SDL_Rect posicion;
+		posicion.x = posicionPanel.x + 50 + 115 * columna;
+		posicion.y = posicionPanel.y + 15 + 40 * fila;
+
+		stringstream nivel;
+		nivel << i+2;
+
+		if(juego->nivel == i+2)
+			SDL_BlitSurface(juego->getSuperficie("nivel" + nivel.str()+"on"), NULL, juego->getSuperficie("screen"), &posicion);
+		else
+			SDL_BlitSurface(juego->getSuperficie("nivel" + nivel.str()), NULL, juego->getSuperficie("screen"), &posicion);
+	}
 
 	// Dibujamos el progreso de salir.
 	juego->dibujarProgresoSalir();

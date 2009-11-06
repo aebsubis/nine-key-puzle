@@ -89,6 +89,9 @@ public:
 	// Guarda las estadísticas del puzzle en el fichero de texto.
 	void guardarEstadisticas();
 
+	// Devuelve el falor de f del puzzle.
+	int getF();
+	
 	// Indica la coordenada del hueco;
 	int huecoX;
 	int huecoY;

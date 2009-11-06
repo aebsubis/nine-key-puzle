@@ -73,6 +73,12 @@ public:
 	// Establece si se debe salir.
 	void setSalir(bool salir);
 
+	// Indica el nivel actual.
+	int getNivel() const;
+
+	// Establece el nivel actual.
+	void setNivel(int nivel);
+
 	// Devuelve la superficie.
 	SDL_Surface* getSuperficie(string nombre);
 
@@ -113,6 +119,12 @@ private:
 
 	// Finaliza los puzzles.
 	void finalizaPuzzles();
+
+	// Resuelve el puzle mediante un algoritmo irrevocable.
+	void resolverIrrevocable();
+
+	// Resuelve el puzle mediante un algoritmo tentativo.
+	void resolverTentativo();
 
 	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
 	string formatoTiempo(Uint32 tiempo);
@@ -166,6 +178,15 @@ private:
 
 	// Tiempo de delay en desplazamiento.
 	int delay;
+
+	// Tiempo de delay en desplazamiento del panel de nivel.
+	int delayNivel;
+	
+	// Nivel seleccionado.
+	int nivel;
+
+	// Indica si se deben dibujar niveles.
+	bool dibujarNiveles;
 };
 
 #endif	/* _JUEGO_H */
