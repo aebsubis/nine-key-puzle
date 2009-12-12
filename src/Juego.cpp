@@ -433,6 +433,22 @@ void Juego::inicializaSDL()
 		exit(1);
 	}
 
+	// Cargamos la imagen de abandonar.
+	superficies["abandonar"] = IMG_Load("data/abandonar.png");
+	if (superficies["abandonar"] == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// Cargamos la imagen de comenzar.
+	superficies["comenzar"] = IMG_Load("data/comenzar.png");
+	if (superficies["comenzar"] == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
 	for(int i=0; i<8; i++)
 	{
 		stringstream nivel;

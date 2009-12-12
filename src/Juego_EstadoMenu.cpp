@@ -222,7 +222,7 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 				}
 				else
 				{
-					if(zona(mouse_x, mouse_y, 250, 50, 750, 555))
+					if(zona(mouse_x, mouse_y, 350, 200, 650, 400))
 					{
 						// Carga el puzzleActual al nivel actual.
 						juego->cargarPuzzle(juego->getNivel());
@@ -235,7 +235,7 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 					}
 				}
 
-				cout << "(" << mouse_x << "," << mouse_y << ")" << endl;
+				
 			}
 			else if(event.button.button == SDL_BUTTON_RIGHT)
 			{
@@ -410,6 +410,11 @@ void Juego_EstadoMenu::render(Juego* juego)
 		}
 	}
 
+
+	// Dibujamos el botón de comenzar.
+	posicion.x = 350;
+	posicion.y = 200;
+	SDL_BlitSurface(juego->getSuperficie("comenzar"), NULL, juego->getSuperficie("screen"), &posicion);
 
 	// Dibujamos el panel de niveles.
 	SDL_Rect posicionPanel;

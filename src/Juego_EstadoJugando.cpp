@@ -84,12 +84,17 @@ SDL_Event event;
 				// Obtenemos las coordenadas del ratón.
 				int mouse_x, mouse_y;
 				SDL_GetMouseState(&mouse_x, &mouse_y);
-
+				
 				// Comprobamos a que zona pertenecen.
 				if(zona(mouse_x, mouse_y, 0, 0, 35, 25))
 				{
 					// Cambiamos el sonido.
 					juego->activarDesactivarSonido();
+				}
+				else if(zona(mouse_x, mouse_y, 70, 10, 170, 30))
+				{
+					// Al pulsar abandonar pasamos al estado menú sin esperar.
+					juego->setEstado(Juego_EstadoMenu::getInstancia());
 				}
 				else
 				{
@@ -275,6 +280,11 @@ void Juego_EstadoJugando::render(Juego* juego)
 		SDL_BlitSurface(juego->getSuperficie("mute"), NULL, juego->getSuperficie("screen"), &posicion);
 	else
 		SDL_BlitSurface(juego->getSuperficie("unmute"), NULL, juego->getSuperficie("screen"), &posicion);
+
+	// Botón de abandonar.
+	posicion.x = 70;
+	posicion.y = 10;
+	SDL_BlitSurface(juego->getSuperficie("abandonar"), NULL, juego->getSuperficie("screen"), &posicion);
 
 	// Logotipo.
 	posicion.x = 0;
