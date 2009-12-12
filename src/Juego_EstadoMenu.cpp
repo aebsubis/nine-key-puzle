@@ -143,7 +143,12 @@ void Juego_EstadoMenu::eventos(Juego* juego)
 				SDL_GetMouseState(&mouse_x, &mouse_y);
 
 				// Comprobamos a que zona pertenecen.
-				if(zona(mouse_x, mouse_y, 0, 0, 240, 240))
+				if(zona(mouse_x, mouse_y, 0, 0, 35, 25))
+				{
+					// Cambiamos el sonido.
+					juego->activarDesactivarSonido();
+				}
+				else if(zona(mouse_x, mouse_y, 0, 0, 240, 240))
 				{
 					// Elegimos el puzzle de arriba.
 					juego->puzzleSiguiente();
@@ -287,12 +292,28 @@ void Juego_EstadoMenu::actualizar(Juego* juego)
 // Hace un render del menú.
 void Juego_EstadoMenu::render(Juego* juego)
 {
+	// Rectángulo de posición.
+	SDL_Rect posicion;
+
 	// Limpiar pantalla
 	SDL_FillRect(juego->getSuperficie("screen"), 0, SDL_MapRGB(juego->getSuperficie("screen")->format, 0, 0, 0));
 
 	// Fondo.
 	SDL_BlitSurface(juego->getSuperficie("fondoMenu"), NULL, juego->getSuperficie("screen"), NULL);
 
+	// Activar/Desactivar sonido.
+	posicion.x = 0;
+	posicion.y = 0;
+	if(juego->sonido == true)
+		SDL_BlitSurface(juego->getSuperficie("mute"), NULL, juego->getSuperficie("screen"), &posicion);
+	else
+		SDL_BlitSurface(juego->getSuperficie("unmute"), NULL, juego->getSuperficie("screen"), &posicion);
+
+	// Logotipo.
+	posicion.x = 0;
+	posicion.y = 580;
+	SDL_BlitSurface(juego->getSuperficie("logotipo"), NULL, juego->getSuperficie("screen"), &posicion);
+	
 	// Dibujamos el listado de puzzles.
 	if(juego->puzzles.size() > 0)
 	{
@@ -338,9 +359,6 @@ void Juego_EstadoMenu::render(Juego* juego)
 		{
 			// Obtenemos el puzzle de la lista que estamos explorando.
 			Puzzle* activo = *pos;
-
-			// Calculamos la posición de la miniatura.
-			SDL_Rect posicion;
 
 			if(numMiniatura>0)
 			{

@@ -80,6 +80,14 @@ bool Sonido::reproducir ()
 	return true;
 }
 
+// Detiene el sonido.
+bool Sonido::detener ()
+{
+	// pause all sample playback
+	Mix_Pause(channel);
+	return true;
+}
+
 bool Sonido::reproduciendose ()
 {
 	return Mix_Playing(channel) != 0;

@@ -43,7 +43,7 @@ void Juego::iniciar()
 		iteracionAnterior = SDL_GetTicks();
 
 		// Bucle del sonido de fondo.
-		if(sonidos["fondo"]->reproduciendose() == false)
+		if(sonidos["fondo"]->reproduciendose() == false && sonido == true)
 			reproducirSonido("fondo");
 
 		while (SDL_GetTicks() - iteracionAnterior < 100)
@@ -158,6 +158,9 @@ Juego::Juego()
 	// Se dibujan los niveles.
 	dibujarNiveles = false;
 
+	// Sonido on/off
+	sonido = true;
+
 	// Inicializamos la semilla del rand.
 	srand(time(NULL));
 }
@@ -178,6 +181,28 @@ void Juego::reproducirSonido(string sonido)
 	{
 		// Mostramos el mensaje de error.
 		cout << "<Error> No se pudo reproducir el sonido " << sonido << "." << endl;
+
+		// Forzamos la salida.
+		exit(0);
+	}
+}
+
+// Detiene el sonido que recibe por parámetro.
+void Juego::detenerSonido(string sonido)
+{
+	// Obtenemos el sonido.
+	Sonido* snd = sonidos[sonido];
+
+	// Comprobamos si el sonido existe.
+	if(snd!=NULL)
+	{
+		// Reproducimos el sonido.
+		snd->detener();
+	}
+	else
+	{
+		// Mostramos el mensaje de error.
+		cout << "<Error> No se pudo detener el sonido " << sonido << "." << endl;
 
 		// Forzamos la salida.
 		exit(0);
@@ -208,7 +233,7 @@ void Juego::cargarPuzzle(int tamano)
 
 		// Removemos el puzzle.
 		puzzleActual->remover();
-
+		
 		// Pasamos a jugar.
 		setEstado(Juego_EstadoJugando::getInstancia());
 
@@ -332,7 +357,7 @@ void Juego::inicializaSDL()
 		superficies["nivel" + nivel.str()] = NULL;
 		superficies["nivel" + nivel.str() + "on"] = NULL;
 	}
-	
+
 	// Activamos el modo de vídeo.
 	superficies["screen"] = SDL_SetVideoMode (800, 600, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if (superficies["screen"] == NULL)
@@ -344,17 +369,41 @@ void Juego::inicializaSDL()
 	// Establecemos un nombre y un icono para la ventana creada.
 	SDL_WM_SetCaption ((char *) "Nine-Key Puzzle", (char *) "Nine-Key Puzzle");
 
-	// Cargamos la imagen de fondo.
-	superficies["fondoMenu"] = IMG_Load("data/fondo.jpg");
+	// Cargamos la imagen de fondoMenu.
+	superficies["fondoMenu"] = IMG_Load("data/fondoMenu.jpg");
 	if (superficies["fondoMenu"] == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
 	}
 
-	// Cargamos la imagen de fondo2.
-	superficies["fondoJuego"] = IMG_Load("data/fondo2.jpg");
+	// Cargamos la imagen de fondoJuego.
+	superficies["fondoJuego"] = IMG_Load("data/fondoJuego.jpg");
 	if (superficies["fondoJuego"] == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// Cargamos la imagen del logotipo.
+	superficies["logotipo"] = IMG_Load("data/equipome.png");
+	if (superficies["logotipo"] == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// Cargamos la imagen del mute.
+	superficies["mute"] = IMG_Load("data/mute.png");
+	if (superficies["mute"] == NULL)
+	{
+		printf("No pude cargar gráfico: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// Cargamos la imagen del unmute.
+	superficies["unmute"] = IMG_Load("data/unmute.png");
+	if (superficies["unmute"] == NULL)
 	{
 		printf("No pude cargar gráfico: %s\n", SDL_GetError());
 		exit(1);
@@ -642,9 +691,33 @@ void Juego::dibujarProgresoSalir()
 	}
 }
 
-//////////////////////////////////////////////
-//////////// FUNCIONES AUXILIARES ////////////
-//////////////////////////////////////////////
+// Mueve la pieza del puzzle actual en la dirección indicada.
+void Juego::mover(string direccion)
+{
+	if (puzzleActual->mover(direccion))
+	{
+		// Reproducimos el sonido.
+		reproducirSonido("intercambiar");
+
+		// Incrementamos los movimientos.
+		contadorMovimientos++;
+	}
+}
+
+// Activa/Desactiva el sonido.
+void Juego::activarDesactivarSonido()
+{
+	if(sonido == true)
+	{
+		sonido = false;
+		detenerSonido("fondo");
+	}
+	else
+	{
+		sonido = true;
+		reproducirSonido("fondo");
+	}
+}
 
 // Resuelve el puzle mediante un algoritmo irrevocable.
 void Juego::resolverIrrevocable()

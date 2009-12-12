@@ -22,6 +22,7 @@ class Juego;
 #include "Juego_EstadoJugando.h"
 #include "Juego_EstadoMenu.h"
 
+
 using namespace std;
 
 /* Clase juego.
@@ -99,6 +100,9 @@ private:
 	// Reproduce el sonido que recibe por parámetro.
 	void reproducirSonido(string sonido);
 
+	// Detiene el sonido que recibe por parámetro.
+	void detenerSonido(string sonido);
+
 	// Carga el puzzle actual con el tamaño indicado.
 	void cargarPuzzle(int tamano);
 
@@ -132,6 +136,12 @@ private:
 	// Dibuja la barra de progreso para salir
 	void dibujarProgresoSalir();
 
+	// Mueve la pieza del puzzle actual en la dirección indicada.
+	void mover(string direccion);
+
+	// Activa/Desactiva el sonido.
+	void activarDesactivarSonido();
+
 	/// Instancia de la clase
 	static Juego* instancia;
 
@@ -155,6 +165,9 @@ private:
 
 	// Indica si se debe salir.
 	bool salir;
+
+	// Indica si el sonido está activado.
+	bool sonido;
 
 	// Fuente del texto.
 	TTF_Font* FONTfuente;

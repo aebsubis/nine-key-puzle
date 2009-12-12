@@ -54,50 +54,22 @@ SDL_Event event;
 			if (event.key.keysym.sym == SDLK_KP2 || event.key.keysym.sym == SDLK_DOWN)
 			{
 				// Movemos la pieza de abajo al hueco.
-				if(juego->puzzleActual->mover("abajo"))
-				{
-					// Reproducimos el sonido.
-					juego->reproducirSonido("intercambiar");
-
-					// Incrementamos los movimientos.
-					juego->contadorMovimientos++;
-				}
+				juego->mover("abajo");
 			}
 			else if (event.key.keysym.sym == SDLK_KP4 || event.key.keysym.sym == SDLK_LEFT)
 			{
 				// Movemos la pieza de la izquierda al hueco.
-				if (juego->puzzleActual->mover("izquierda"))
-				{
-					// Reproducimos el sonido.
-					juego->reproducirSonido("intercambiar");
-
-					// Incrementamos los movimientos.
-					juego->contadorMovimientos++;
-				}
+				juego->mover("izquierda");
 			}
 			else if (event.key.keysym.sym == SDLK_KP6 || event.key.keysym.sym == SDLK_RIGHT)
 			{
 				// Movemos la pieza de la derecha al hueco.
-				if (juego->puzzleActual->mover("derecha"))
-				{
-					// Reproducimos el sonido.
-					juego->reproducirSonido("intercambiar");
-
-					// Incrementamos los movimientos.
-					juego->contadorMovimientos++;
-				}
+				juego->mover("derecha");
 			}
 			else if (event.key.keysym.sym == SDLK_KP8 || event.key.keysym.sym == SDLK_UP)
 			{
 				// Movemos la pieza de arriba al hueco.
-				if (juego->puzzleActual->mover("arriba"))
-				{
-					// Reproducimos el sonido.
-					juego->reproducirSonido("intercambiar");
-
-					// Incrementamos los movimientos.
-					juego->contadorMovimientos++;
-				}
+				juego->mover("arriba");
 			}
 			else if (event.key.keysym.sym == SDLK_KP9)
 			{
@@ -114,97 +86,78 @@ SDL_Event event;
 				SDL_GetMouseState(&mouse_x, &mouse_y);
 
 				// Comprobamos a que zona pertenecen.
-				int tamano = 500 / juego->puzzleActual->getTamano();
-				bool encontrado = false;
-				for(int i=0; i<juego->puzzleActual->getTamano() && encontrado == false; i++)
+				if(zona(mouse_x, mouse_y, 0, 0, 35, 25))
 				{
-					for(int j=0; j<juego->puzzleActual->getTamano() && encontrado == false; j++)
+					// Cambiamos el sonido.
+					juego->activarDesactivarSonido();
+				}
+				else
+				{
+					// Comprobamos a que zona pertenecen.
+					int tamano = 500 / juego->puzzleActual->getTamano();
+					bool encontrado = false;
+					for(int i=0; i<juego->puzzleActual->getTamano() && encontrado == false; i++)
 					{
-						if( (i == juego->puzzleActual->huecoX+1 ) && ( j == juego->puzzleActual->huecoY)  )
+						for(int j=0; j<juego->puzzleActual->getTamano() && encontrado == false; j++)
 						{
-							// Calculamos la posición de la pieza.
-							int origen_x = 250 + tamano*i;
-							int origen_y = 50 + tamano*j ;
-							int destino_x = origen_x + tamano;
-							int destino_y = origen_y + tamano;
-
-							if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+							if( (i == juego->puzzleActual->huecoX+1 ) && ( j == juego->puzzleActual->huecoY)  )
 							{
-								encontrado = true;
-								// Movemos la pieza de la derecha al hueco.
-								if (juego->puzzleActual->mover("izquierda"))
-								{
-									// Reproducimos el sonido.
-									juego->reproducirSonido("intercambiar");
+								// Calculamos la posición de la pieza.
+								int origen_x = 250 + tamano*i;
+								int origen_y = 50 + tamano*j ;
+								int destino_x = origen_x + tamano;
+								int destino_y = origen_y + tamano;
 
-									// Incrementamos los movimientos.
-									juego->contadorMovimientos++;
+								if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+								{
+									encontrado = true;
+									// Movemos la pieza de la derecha al hueco.
+									juego->mover("izquierda");
 								}
 							}
-						}
-						else if( (i == juego->puzzleActual->huecoX-1 ) && ( j == juego->puzzleActual->huecoY) )
-						{
-							// Calculamos la posición de la pieza.
-							int origen_x = 250 + tamano*i;
-							int origen_y = 50 + tamano*j ;
-							int destino_x = origen_x + tamano;
-							int destino_y = origen_y + tamano;
-
-							if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+							else if( (i == juego->puzzleActual->huecoX-1 ) && ( j == juego->puzzleActual->huecoY) )
 							{
-								encontrado = true;
-								// Movemos la pieza de la izquierda al hueco.
-								if (juego->puzzleActual->mover("derecha"))
-								{
-									// Reproducimos el sonido.
-									juego->reproducirSonido("intercambiar");
+								// Calculamos la posición de la pieza.
+								int origen_x = 250 + tamano*i;
+								int origen_y = 50 + tamano*j ;
+								int destino_x = origen_x + tamano;
+								int destino_y = origen_y + tamano;
 
-									// Incrementamos los movimientos.
-									juego->contadorMovimientos++;
+								if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+								{
+									encontrado = true;
+									// Movemos la pieza de la izquierda al hueco.
+									juego->mover("derecha");
 								}
 							}
-						}
-						else if( (i == juego->puzzleActual->huecoX ) && ( j == juego->puzzleActual->huecoY+1)  )
-						{
-							// Calculamos la posición de la pieza.
-							int origen_x = 250 + tamano*i;
-							int origen_y = 50 + tamano*j ;
-							int destino_x = origen_x + tamano;
-							int destino_y = origen_y + tamano;
-
-							if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+							else if( (i == juego->puzzleActual->huecoX ) && ( j == juego->puzzleActual->huecoY+1)  )
 							{
-								encontrado = true;
-								// Movemos la pieza de la abajo al hueco.
-								if (juego->puzzleActual->mover("arriba"))
-								{
-									// Reproducimos el sonido.
-									juego->reproducirSonido("intercambiar");
+								// Calculamos la posición de la pieza.
+								int origen_x = 250 + tamano*i;
+								int origen_y = 50 + tamano*j ;
+								int destino_x = origen_x + tamano;
+								int destino_y = origen_y + tamano;
 
-									// Incrementamos los movimientos.
-									juego->contadorMovimientos++;
+								if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+								{
+									encontrado = true;
+									// Movemos la pieza de la abajo al hueco.
+									juego->mover("arriba");
 								}
 							}
-						}
-						else if( (i == juego->puzzleActual->huecoX ) && ( j == juego->puzzleActual->huecoY-1)  )
-						{
-							// Calculamos la posición de la pieza.
-							int origen_x = 250 + tamano*i;
-							int origen_y = 50 + tamano*j ;
-							int destino_x = origen_x + tamano;
-							int destino_y = origen_y + tamano;
-
-							if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+							else if( (i == juego->puzzleActual->huecoX ) && ( j == juego->puzzleActual->huecoY-1)  )
 							{
-								encontrado = true;
-								// Movemos la pieza de la arriba al hueco.
-								if (juego->puzzleActual->mover("abajo"))
-								{
-									// Reproducimos el sonido.
-									juego->reproducirSonido("intercambiar");
+								// Calculamos la posición de la pieza.
+								int origen_x = 250 + tamano*i;
+								int origen_y = 50 + tamano*j ;
+								int destino_x = origen_x + tamano;
+								int destino_y = origen_y + tamano;
 
-									// Incrementamos los movimientos.
-									juego->contadorMovimientos++;
+								if(zona(mouse_x, mouse_y, origen_x, origen_y, destino_x, destino_y))
+								{
+									encontrado = true;
+									// Movemos la pieza de la arriba al hueco.
+									juego->mover("abajo");
 								}
 							}
 						}
@@ -221,13 +174,18 @@ SDL_Event event;
 			}
 			else if(event.button.button == SDL_BUTTON_WHEELUP)
 			{
-				// Elegimos el puzzle de abajo.
-				//juego->puzzleAnterior();
+				/*
+				// Pasamos al estado historial.
+				juego->setEstado(Juego_EstadoHistorial::getInstancia());
+				
+				// Incrementamos la posición del historial.
+				juego->avanzarHistorial();
+				 */
 			}
 			else if(event.button.button == SDL_BUTTON_WHEELDOWN)
 			{
-				// Elegimos el puzzle de arriba.
-				//juego->puzzleSiguiente();
+				// Decrementamos la posición del historial.
+				//juego->retrocederHistorial();
 			}
 		}
 		else if(event.type == SDL_QUIT)
@@ -309,6 +267,19 @@ void Juego_EstadoJugando::render(Juego* juego)
 
 	// Fondo.
 	SDL_BlitSurface(juego->getSuperficie("fondoJuego"), NULL, juego->getSuperficie("screen"), NULL);
+
+	// Activar/Desactivar sonido.
+	posicion.x = 0;
+	posicion.y = 0;
+	if(juego->sonido == true)
+		SDL_BlitSurface(juego->getSuperficie("mute"), NULL, juego->getSuperficie("screen"), &posicion);
+	else
+		SDL_BlitSurface(juego->getSuperficie("unmute"), NULL, juego->getSuperficie("screen"), &posicion);
+
+	// Logotipo.
+	posicion.x = 0;
+	posicion.y = 580;
+	SDL_BlitSurface(juego->getSuperficie("logotipo"), NULL, juego->getSuperficie("screen"), &posicion);
 
 	// Comprobamos si está solucionado.
 	bool solucionado = juego->puzzleActual->solucionado();

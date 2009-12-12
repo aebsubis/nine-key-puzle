@@ -7,6 +7,7 @@
       <itemPath>include/Directorio.h</itemPath>
       <itemPath>include/Estado.h</itemPath>
       <itemPath>include/Juego.h</itemPath>
+      <itemPath>include/Juego_EstadoHistorial.h</itemPath>
       <itemPath>include/Juego_EstadoJugando.h</itemPath>
       <itemPath>include/Juego_EstadoMenu.h</itemPath>
       <itemPath>include/Matriz.h</itemPath>
@@ -23,6 +24,7 @@
                    projectFiles="true">
       <itemPath>src/Directorio.cpp</itemPath>
       <itemPath>src/Juego.cpp</itemPath>
+      <itemPath>src/Juego_EstadoHistorial.cpp</itemPath>
       <itemPath>src/Juego_EstadoJugando.cpp</itemPath>
       <itemPath>src/Juego_EstadoMenu.cpp</itemPath>
       <itemPath>src/Pieza.cpp</itemPath>

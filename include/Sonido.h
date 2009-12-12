@@ -40,6 +40,13 @@ class Sonido
 		 */
 		bool reproducir ();
 
+		/// Detiene el sonido.
+		/** Una vez que se invoca al método, el proceso que lo invocó debe seguir vivo el tiempo suficiente para
+		 * para completar la reproducción.
+		 * \return Devuelve falso si no está cargado y no lo reproduce. Verdadero en caso contrario.
+		 */
+		bool detener ();
+
 		/// Comprueba si el sonido está reproduciéndose actualmente.
 		/** \return Devuelve verdadero si está reproduciéndose. Falso en caso contrario.
 		 */
