@@ -46,7 +46,7 @@ SDL_Event event;
 			else if (event.key.keysym.sym == SDLK_q)
 			{
 				// Efectúa un movimiento con el algoritmo irrevocable.
-				juego->resolverIrrevocable();
+				//juego->resolverIrrevocable();
 			}
 		}
 		else if (event.type == SDL_KEYUP)

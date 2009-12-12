@@ -1,9 +1,7 @@
-Botón entrar, salir.
+
 Compilar en windows.
 Arreglar sonido fondo.
+Modificar fuente botones.
 Poner puzzles guapos
 
-// Internacionalizar.
-// Arrastrar fichas.
 // Algoritmo resuelve A*.
-// Historial.

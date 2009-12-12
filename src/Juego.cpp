@@ -735,6 +735,7 @@ void Juego::activarDesactivarSonido()
 	}
 }
 
+/*
 // Resuelve el puzle mediante un algoritmo irrevocable.
 void Juego::resolverIrrevocable()
 {
@@ -834,4 +835,4 @@ void Juego::resolverIrrevocable()
 void Juego::resolverTentativo()
 {
 
-}
+}*/

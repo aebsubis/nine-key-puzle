@@ -124,11 +124,11 @@ private:
 	// Finaliza los puzzles.
 	void finalizaPuzzles();
 
-	// Resuelve el puzle mediante un algoritmo irrevocable.
+	/*// Resuelve el puzle mediante un algoritmo irrevocable.
 	void resolverIrrevocable();
 
 	// Resuelve el puzle mediante un algoritmo tentativo.
-	void resolverTentativo();
+	void resolverTentativo();*/
 
 	// Devuelve el tiempo en formato (dd:)(hh:)mm:ss
 	string formatoTiempo(Uint32 tiempo);
