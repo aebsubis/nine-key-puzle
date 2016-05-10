@@ -1,7 +1,0 @@
-
-Compilar en windows.
-Arreglar sonido fondo.
-Modificar fuente botones.
-Poner puzzles guapos
-
-// Algoritmo resuelve A*.
